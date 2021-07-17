@@ -5,6 +5,7 @@ import boto3
 import logging
 import pymongo as pm
 import psycopg2 as pypg
+from bottle_jwt import auth
 from botocore.config import Config
 from bson.objectid import ObjectId
 from operations.latlong import LatLong
@@ -136,6 +137,8 @@ def login():
                             cur.execute(
                                 '''select user_id,user_name,user_type from public.registered_users where user_email = %s and password = %s''', ud)
                             q = cur.fetchone()
+                            tk = auth.BaseAuthBackend.authenticate_user(
+                                ud[0], ud[1])
                             v = {"success": True, "status": True, "message": "Logged In Successfully",
                                  "user_id": q[0], "user_name": q[1], "user_type": q[2]}
                             response.body = str(v)
