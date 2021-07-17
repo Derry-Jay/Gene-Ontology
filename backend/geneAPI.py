@@ -108,7 +108,7 @@ def getListFromDict(data):
 #        data['date_of_birth'], data['gender'], data['user_email'], data['mobile_number'], data['user_name'])
 # cur.execute(
 #     '''update public.registered_users set user_name=%s, password=%s, date_of_birth=%s, gender=%s, user_email=%s, mobile_number=%s where user_id=%s''', ud1)
-#
+# '''select count(user_id) from public.registered_users where user_email=%s and password=%s'''
 
 
 @app.post('/login')
@@ -125,10 +125,11 @@ def login():
             raise ValueError
         try:
             if ('user_email' in data.keys() and 'password' in data.keys()):
+                cs = generateCountStatement(
+                    'public.registered_users', data, 'user_id')
+                ud = (data['user_email'], data['password'])
                 try:
-                    ud = (data['user_email'], data['password'])
-                    cur.execute(
-                        '''select count(user_id) from public.registered_users where user_email=%s and password=%s''', ud)
+                    cur.execute(cs, ud)
                     a = cur.fetchone()[0]
                     if a == 1:
                         try:
