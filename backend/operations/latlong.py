@@ -27,16 +27,18 @@ class LatLong:
         return flag
 
     def haversine(self, c):
-        pi = dc.Decimal(math.pi)
-        ro = dc.Decimal(180.0)
-        dLat = abs(self.lat - c.lat) * pi / ro
-        dLon = abs(self.lon - c.lon) * pi / ro
-        self.lat = self.lat * pi / ro
-        c.lat = c.lat * pi / ro
-        f = (pow(math.sin(dLat / 2), 2) +
-             pow(math.sin(dLon / 2), 2) *
-             math.cos(self.lat) * math.cos(c.lat))
-        d = 12742 * math.asin(math.sqrt(f))
+        d = 0.0
+        if isinstance(c, LatLong):
+            pi = dc.Decimal(math.pi)
+            ro = dc.Decimal(180.0)
+            dLat = abs(self.lat - c.lat) * pi / ro
+            dLon = abs(self.lon - c.lon) * pi / ro
+            self.lat = self.lat * pi / ro
+            c.lat = c.lat * pi / ro
+            f = (pow(math.sin(dLat / 2), 2) +
+                 pow(math.sin(dLon / 2), 2) *
+                 math.cos(self.lat) * math.cos(c.lat))
+            d = 12742 * math.asin(math.sqrt(f))
         return d
 
     def getLatLongFromListOrTuple(self, t):

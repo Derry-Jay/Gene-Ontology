@@ -94,7 +94,7 @@ def getListFromDict(data):
     return g
 
 
-# and  and = and
+# '''select count(user_id) from public.registered_users where user_name=%s and user_type=%s and user_email=%s and password=%s and mobile_number=%s''' and and = and
 # cqs+
 # cur.execute('''insert into public.registered_users(user_name, user_mail, pincode, password) values (%s , %s )''', ())
 # cur.execute('''''')
@@ -195,8 +195,9 @@ def register():
             if 'user_name' in data.keys() and 'password' in data.keys() and 'user_type' in data.keys() and 'user_email' in data.keys() and 'pincode' in data.keys() and 'gender' in data.keys() and 'mobile_number' in data.keys() and 'country' in data.keys() and emailpattern.match(data['user_email']) != None and passwordpattern.match(data['password']) != None:
                 ud = (data['user_name'], data['user_type'],
                       data['user_email'], data['password'], data['mobile_number'])
-                cur.execute(
-                    '''select count(user_id) from public.registered_users where user_name=%s and user_type=%s and user_email=%s and password=%s and mobile_number=%s''', ud)
+                cs = generateCountStatement(
+                    'public.registered_users', data, 'user_id')
+                cur.execute(cs, ud)
                 if cur.fetchone()[0] == 0:
                     try:
                         ao = LatLong()
