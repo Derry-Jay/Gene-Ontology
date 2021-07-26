@@ -15,6 +15,9 @@ app = Bottle(__name__)
 emailpattern = re.compile(r'^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$')
 passwordpattern = re.compile(
     r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!#%*?&]{6,20}$')
+# print("++++++++++++++++++++++++++++++++++++++++")
+# print([0, 1]+[2, 3])
+# print("-----------------------------------------")
 mc = pm.MongoClient("mongodb://localhost:27017")
 db = mc['local']
 col = db['gene_test_results']
@@ -112,9 +115,6 @@ def getListFromDict(data):
 # '''select count(user_id) from public.registered_users where user_email=%s and password=%s'''
 # ll = LatLong()
     # print("++++++++++++++++++++++++++++++++++++++++")
-    # print("-----------------------------------------")
-    # print("++++++++++++++++++++++++++++++++++++++++")
-    # print()
     # print()
 
 
