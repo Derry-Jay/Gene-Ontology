@@ -14,6 +14,22 @@ class LatLong:
             self.lon = args[1] if args[1] is dc.Decimal else dc.Decimal(
                 args[1])
 
+    def __str__(self):
+        lats = ""
+        longs = ""
+        if self.lat > 0:
+            lats = " N"
+        elif self.lat < 0:
+            lats = " S"
+        if self.lon > 0:
+            longs = " E"
+        elif self.lon < 0:
+            longs = " W"
+        return "Latitude: " + str(abs(self.lat)) + lats + " Longitude: " + str(abs(self.lon)) + longs
+
+    def __eq__(self, value):
+        return isinstance(value, LatLong) and value.lat == self.lat and value.lon == self.lon
+
     def putToDict(self):
         d = {'latitude': str(self.lat), 'longitude': str(self.lon)}
         return d
@@ -21,7 +37,7 @@ class LatLong:
     def belongs_to(self, ll):
         flag = False
         for i in ll:
-            if self.lat == i.lat and self.lon == i.lon:
+            if self == i:
                 flag = True
                 break
         return flag
@@ -35,9 +51,9 @@ class LatLong:
             dLon = abs(self.lon - c.lon) * pi / ro
             self.lat = self.lat * pi / ro
             c.lat = c.lat * pi / ro
-            f = (pow(math.sin(dLat / 2), 2) +
-                 pow(math.sin(dLon / 2), 2) *
-                 math.cos(self.lat) * math.cos(c.lat))
+            f = pow(math.sin(dLat / 2), 2) + (
+                pow(math.sin(dLon / 2), 2) *
+                math.cos(self.lat) * math.cos(c.lat))
             d = 12742 * math.asin(math.sqrt(f))
         return d
 
@@ -62,8 +78,8 @@ class LatLong:
     def getLatLongFromZipCodeAndCountryCode(self, z, c):
         if z is not None and c is not None and z != "" and c != "":
             place = pgc.Nominatim(c)
-            l = place.query_postal_code(z).dropna()
-            return l.to_dict()
+            l = place.query_postal_code(z).dropna().to_dict()
+            return l
         else:
             return {}
 
@@ -85,23 +101,6 @@ class LatLong:
             else:
                 continue
         return g
-
-    def putData(self):
-        print("++++++++++++++++++++++++++++++++++++++++")
-        lats = ""
-        longs = ""
-        if self.lat > 0:
-            lats = " N"
-        elif self.lat < 0:
-            lats = " S"
-        print("Latitude: " + str(abs(self.lat)) + lats)
-        print("-----------------------------------------")
-        if self.lon > 0:
-            longs = " E"
-        elif self.lon < 0:
-            longs = " W"
-        print("Longitude: " + str(abs(self.lon)) + longs)
-        print("++++++++++++++++++++++++++++++++++++++++")
 
     def getLatLongFromZipCodeAndPutToDict(self, z):
         lldl = []

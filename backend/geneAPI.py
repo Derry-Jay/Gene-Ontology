@@ -110,6 +110,12 @@ def getListFromDict(data):
 # cur.execute(
 #     '''update public.registered_users set user_name=%s, password=%s, date_of_birth=%s, gender=%s, user_email=%s, mobile_number=%s where user_id=%s''', ud1)
 # '''select count(user_id) from public.registered_users where user_email=%s and password=%s'''
+# ll = LatLong()
+    # print("++++++++++++++++++++++++++++++++++++++++")
+    # print("-----------------------------------------")
+    # print("++++++++++++++++++++++++++++++++++++++++")
+    # print()
+    # print()
 
 
 @app.post('/login')
@@ -245,7 +251,6 @@ def getUserDetails():
         elif 'user_id' in data.keys():
             try:
                 q = (data['user_id'],)
-                ll = LatLong()
                 cur.execute(
                     '''select user_name, user_type, date_of_birth, gender, mobile_number, user_email, latitude, longitude from public.registered_users where user_id=%s''', q)
                 dft = [dict(zip([col[0] for col in cur.description], row))
