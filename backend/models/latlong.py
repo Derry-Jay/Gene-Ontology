@@ -8,10 +8,10 @@ class LatLong:
     lon = dc.Decimal(0.0)
 
     def __init__(self, *args):
-        if args != () and len(args) == 2:
-            self.lat = args[0] if args[0] is dc.Decimal else dc.Decimal(
+        if len(args) == 2:
+            self.lat = args[0] if isinstance(args[0], dc.Decimal) else dc.Decimal(
                 args[0])
-            self.lon = args[1] if args[1] is dc.Decimal else dc.Decimal(
+            self.lon = args[1] if isinstance(args[1], dc.Decimal) else dc.Decimal(
                 args[1])
 
     def __str__(self):
@@ -37,7 +37,7 @@ class LatLong:
     def belongs_to(self, ll):
         flag = False
         for i in ll:
-            if self == i:
+            if i == self:
                 flag = True
                 break
         return flag
@@ -49,11 +49,11 @@ class LatLong:
             ro = dc.Decimal(180.0)
             dLat = abs(self.lat - c.lat) * pi / ro
             dLon = abs(self.lon - c.lon) * pi / ro
-            self.lat = self.lat * pi / ro
-            c.lat = c.lat * pi / ro
+            lart1 = self.lat * pi / ro
+            lart2 = c.lat * pi / ro
             f = pow(math.sin(dLat / 2), 2) + (
                 pow(math.sin(dLon / 2), 2) *
-                math.cos(self.lat) * math.cos(c.lat))
+                math.cos(lart1) * math.cos(lart2))
             d = 12742 * math.asin(math.sqrt(f))
         return d
 

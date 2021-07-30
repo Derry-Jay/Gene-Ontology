@@ -8,16 +8,21 @@ import psycopg2 as pypg
 from bottle_jwt import auth
 from botocore.config import Config
 from bson.objectid import ObjectId
-from operations.latlong import LatLong
+from models.latlong import LatLong
+from models.distance import MetricDistance
+from operations.calculate import Calculations
 from truckpad.bottle.cors import CorsPlugin, enable_cors
 from bottle import Bottle, request, response, post, get, put, delete, run
 app = Bottle(__name__)
 emailpattern = re.compile(r'^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$')
 passwordpattern = re.compile(
     r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!#%*?&]{6,20}$')
-# print("++++++++++++++++++++++++++++++++++++++++")
-# print([0, 1]+[2, 3])
-# print("-----------------------------------------")
+print("++++++++++++++++++++++++++++++++++++++++")
+print("Bye")
+print(MetricDistance(Calculations().haversine(
+    LatLong(12.9739697, 80.2151917), LatLong(12.9794559, 80.2222834))))
+print("-----------------------------------------")
+exit()
 mc = pm.MongoClient("mongodb://localhost:27017")
 db = mc['local']
 col = db['gene_test_results']
