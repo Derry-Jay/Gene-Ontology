@@ -17,12 +17,12 @@ app = Bottle(__name__)
 emailpattern = re.compile(r'^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$')
 passwordpattern = re.compile(
     r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!#%*?&]{6,20}$')
-print("++++++++++++++++++++++++++++++++++++++++")
-print("Bye")
-print(MetricDistance(Calculations().haversine(
-    LatLong(12.9739697, 80.2151917), LatLong(12.9794559, 80.2222834))))
-print("-----------------------------------------")
-exit()
+# print("++++++++++++++++++++++++++++++++++++++++")
+# print("Bye")
+# print(MetricDistance(Calculations().haversine(
+#     LatLong(12.9739697, 80.2151917), LatLong(12.9794559, 80.2222834))))
+# print("-----------------------------------------")
+# exit()
 mc = pm.MongoClient("mongodb://localhost:27017")
 db = mc['local']
 col = db['gene_test_results']
