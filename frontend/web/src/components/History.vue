@@ -41,13 +41,5 @@
     </div>
   </div>
 </template>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-<script src="js/jquery.matchHeight-min.js"></script>
-<script src="js/wow.min.js"></script>
-<script src="js/animsition.min.js"></script>
-<script src="js/functions.js"></script>
-<script src="js/you-video.js"></script>
-<script>
-// down?id={{rs.getString("file")}}
+<script type="text/javascript">
 </script>

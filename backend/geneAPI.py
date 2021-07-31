@@ -5,15 +5,24 @@ import boto3
 import logging
 import pymongo as pm
 import psycopg2 as pypg
+from bottle_jwt import auth
 from botocore.config import Config
-from operations.latlong import LatLong
+from bson.objectid import ObjectId
+from models.latlong import LatLong
+from models.distance import MetricDistance
+from operations.calculate import Calculations
 from truckpad.bottle.cors import CorsPlugin, enable_cors
 from bottle import Bottle, request, response, post, get, put, delete, run
-from bson.objectid import ObjectId
 app = Bottle(__name__)
 emailpattern = re.compile(r'^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$')
 passwordpattern = re.compile(
     r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!#%*?&]{6,20}$')
+# print("++++++++++++++++++++++++++++++++++++++++")
+# print("Bye")
+# print(MetricDistance(Calculations().haversine(
+#     LatLong(12.9739697, 80.2151917), LatLong(12.9794559, 80.2222834))))
+# print("-----------------------------------------")
+# exit()
 mc = pm.MongoClient("mongodb://localhost:27017")
 db = mc['local']
 col = db['gene_test_results']
@@ -93,7 +102,7 @@ def getListFromDict(data):
     return g
 
 
-# and  and = and
+# '''select count(user_id) from public.registered_users where user_name=%s and user_type=%s and user_email=%s and password=%s and mobile_number=%s''' and and = and
 # cqs+
 # cur.execute('''insert into public.registered_users(user_name, user_mail, pincode, password) values (%s , %s )''', ())
 # cur.execute('''''')
@@ -108,7 +117,10 @@ def getListFromDict(data):
 #        data['date_of_birth'], data['gender'], data['user_email'], data['mobile_number'], data['user_name'])
 # cur.execute(
 #     '''update public.registered_users set user_name=%s, password=%s, date_of_birth=%s, gender=%s, user_email=%s, mobile_number=%s where user_id=%s''', ud1)
-#
+# '''select count(user_id) from public.registered_users where user_email=%s and password=%s'''
+# ll = LatLong()
+    # print("++++++++++++++++++++++++++++++++++++++++")
+    # print()
 
 
 @app.post('/login')
@@ -125,16 +137,19 @@ def login():
             raise ValueError
         try:
             if ('user_email' in data.keys() and 'password' in data.keys()):
+                cs = generateCountStatement(
+                    'public.registered_users', data, 'user_id')
+                ud = (data['user_email'], data['password'])
                 try:
-                    ud = (data['user_email'], data['password'])
-                    cur.execute(
-                        '''select count(user_id) from public.registered_users where user_email=%s and password=%s''', ud)
+                    cur.execute(cs, ud)
                     a = cur.fetchone()[0]
                     if a == 1:
                         try:
                             cur.execute(
                                 '''select user_id,user_name,user_type from public.registered_users where user_email = %s and password = %s''', ud)
                             q = cur.fetchone()
+                            tk = auth.BaseAuthBackend.authenticate_user(
+                                ud[0], ud[1])
                             v = {"success": True, "status": True, "message": "Logged In Successfully",
                                  "user_id": q[0], "user_name": q[1], "user_type": q[2]}
                             response.body = str(v)
@@ -191,8 +206,9 @@ def register():
             if 'user_name' in data.keys() and 'password' in data.keys() and 'user_type' in data.keys() and 'user_email' in data.keys() and 'pincode' in data.keys() and 'gender' in data.keys() and 'mobile_number' in data.keys() and 'country' in data.keys() and emailpattern.match(data['user_email']) != None and passwordpattern.match(data['password']) != None:
                 ud = (data['user_name'], data['user_type'],
                       data['user_email'], data['password'], data['mobile_number'])
-                cur.execute(
-                    '''select count(user_id) from public.registered_users where user_name=%s and user_type=%s and user_email=%s and password=%s and mobile_number=%s''', ud)
+                cs = generateCountStatement(
+                    'public.registered_users', data, 'user_id')
+                cur.execute(cs, ud)
                 if cur.fetchone()[0] == 0:
                     try:
                         ao = LatLong()
@@ -240,7 +256,6 @@ def getUserDetails():
         elif 'user_id' in data.keys():
             try:
                 q = (data['user_id'],)
-                ll = LatLong()
                 cur.execute(
                     '''select user_name, user_type, date_of_birth, gender, mobile_number, user_email, latitude, longitude from public.registered_users where user_id=%s''', q)
                 dft = [dict(zip([col[0] for col in cur.description], row))
@@ -1026,7 +1041,8 @@ def getTestResults():
             raise ValueError
         elif 'user_id' in data.keys():
             try:
-                cur.execute('''select result_id from public.user_test_results where user_id=%s''', (data['user_id'],))
+                cur.execute(
+                    '''select result_id from public.user_test_results where user_id=%s''', (data['user_id'],))
                 a = cur.fetchall()
                 res = []
                 for i in a:
