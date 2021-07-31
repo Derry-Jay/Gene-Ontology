@@ -33,3 +33,5 @@
     <div class="colw_6 paddbott100 spec-r"></div>
   </div>
 </template>
+<script type="text/javascript">
+</script>

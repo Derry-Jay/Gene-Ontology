@@ -3,29 +3,22 @@
     <div id="section-1">
       <header class="main_h">
         <div class="menufix">
-          <a class="logo" href="index.html"
+          <router-link to="/welcome"
             ><img src="images/logo.jpg" alt="Hello"
-          /></a>
+          /></router-link>
           <div class="mobile-toggle">
             <span></span> <span></span> <span></span>
           </div>
           <nav>
             <ul>
               <li>
-                <a class="out active animsition-link" href="admin.jsp">HOME</a>
+                <router-link to="/welcome">HOME</router-link>
               </li>
               <li class="line">
-                <a class="out animsition-link" href="asso1.jsp"
-                  >Gene Disease List</a
-                >
+                <router-link to="/upload">Add/Update Data</router-link>
               </li>
               <li class="line">
-                <a class="out animsition-link" href="adminupload.jsp"
-                  >Update Gene</a
-                >
-              </li>
-              <li class="line">
-                <a class="out animsition-link" href="login.jsp">LOGOUT</a>
+                <router-link to="/login"></router-link>
               </li>
             </ul>
           </nav>
@@ -66,14 +59,5 @@
     <div class="colw_6 paddbott100 spec-r"></div>
   </div>
 </template>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-<script src="http://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.3/jquery.easing.min.js"></script>
-<script src="{{url_for('static'),filename='js/jquery.matchHeight-min.js'}}"></script>
-<script src="{{url_for('static'),filename='js/wow.min.js'}}"></script>
-<script src="{{url_for('static'),filename='js/animsition.min.js'}}"></script>
-<script src="{{url_for('static'),filename='js/jquery.parallax-scroll.js'}}"></script>
-<script src="{{url_for('static'),filename='js/owl.carousel.min.js'}}"></script>
-<script src="{{url_for('static'),filename='js/jquery.cbpQTRotator.min.js'}}"></script>
-<script src="{{url_for('static'),filename='js/functions.js'}}"></script>
-<script src="{{url_for('static'),filename='js/particle.js'}}"></script>
+<script type="text/javascript">
+</script>

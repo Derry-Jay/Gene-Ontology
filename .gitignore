@@ -1,7 +1,18 @@
-/.vscode
-node_modules/
+.DS_Store
+/node_modules/
+/dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+/test/unit/coverage/
+/test/e2e/reports/
+selenium-debug.log
 /__pycache__/
-/sql/
-/FunctionalModules/__pycache__/
-package.json
-package-lock.json
+# Editor directories and files
+.idea
+*/.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.pyc

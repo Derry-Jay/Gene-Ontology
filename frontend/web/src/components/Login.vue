@@ -64,15 +64,12 @@ export default {
         this.data = data
         console.log(this.data)
         if (data.success && data.status) {
-          console.log('++++++++++++++')
-          console.log('hi')
           const passData = {'name': 'Home'}
           router.push(passData)
         } else {
           console.log('hi')
         }
       } else {
-        console.log('-------------')
         console.log('bye')
       }
     }
