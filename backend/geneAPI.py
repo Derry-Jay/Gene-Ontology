@@ -17,25 +17,27 @@ app = Bottle(__name__)
 emailpattern = re.compile(r'^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$')
 passwordpattern = re.compile(
     r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!#%*?&]{6,20}$')
-# print("++++++++++++++++++++++++++++++++++++++++")
-# print("Bye")
-# print(MetricDistance(Calculations().haversine(
-#     LatLong(12.9739697, 80.2151917), LatLong(12.9794559, 80.2222834))))
-# print("-----------------------------------------")
-# exit()
+mys = boto3.session.Session(
+    aws_access_key_id='AKIA4NWNR6RKLLQXECEN', aws_secret_access_key='DsspNdp62GLSoK2xDLrSPaQyqW7Wz1iK92iL2h', region_name='ap-south-1')
+myr = mys.region_name
+client = mys.client('s3', aws_access_key_id='AKIA4NWNR6RKLLQXECEN', aws_secret_access_key='DsspNdp62GLSoK2xDLrSPaQyqW7Wz1iK92iL2h',
+                    region_name='ap-south-1', config=Config(signature_version='s3v4'))
+s3 = boto3.resource('s3')
+for bucket in s3.buckets.all():
+    print(bucket.name)
+
+print("++++++++++++++++++++++++++++++++++++++++")
+print("Bye")
+print(MetricDistance(Calculations().haversine(
+    LatLong(12.9739697, 80.2151917), LatLong(12.9794559, 80.2222834))))
+print("-----------------------------------------")
+exit()
+
 mc = pm.MongoClient("mongodb://localhost:27017")
 db = mc['local']
 col = db['gene_test_results']
 con = pypg.connect(user='postgres', password='password', database='postgres')
 cur = con.cursor()
-mys = boto3.session.Session(
-    aws_access_key_id='AKIA4NWNR6RKKTEAI5PB', aws_secret_access_key='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', region_name='ap-south-1')
-myr = mys.region_name
-client = mys.client('s3', aws_access_key_id='AKIA4NWNR6RKKTEAI5PB', aws_secret_access_key='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',
-                    region_name='ap-south-1', config=Config(signature_version='s3v4'))
-s3 = boto3.resource('s3')
-for bucket in s3.buckets.all():
-    print(bucket.name)
 
 
 def generateUpdateStatement(tableName, data):
