@@ -17,21 +17,22 @@ app = Bottle(__name__)
 emailpattern = re.compile(r'^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$')
 passwordpattern = re.compile(
     r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!#%*?&]{6,20}$')
-mys = boto3.session.Session(
-    aws_access_key_id='AKIA4NWNR6RKLLQXECEN', aws_secret_access_key='DsspNdp62GLSoK2xDLrSPaQyqW7Wz1iK92iL2h', region_name='ap-south-1')
-myr = mys.region_name
-client = mys.client('s3', aws_access_key_id='AKIA4NWNR6RKLLQXECEN', aws_secret_access_key='DsspNdp62GLSoK2xDLrSPaQyqW7Wz1iK92iL2h',
-                    region_name='ap-south-1', config=Config(signature_version='s3v4'))
-s3 = boto3.resource('s3')
-for bucket in s3.buckets.all():
-    print(bucket.name)
 
-print("++++++++++++++++++++++++++++++++++++++++")
-print("Bye")
-print(MetricDistance(Calculations().haversine(
-    LatLong(12.9739697, 80.2151917), LatLong(12.9794559, 80.2222834))))
-print("-----------------------------------------")
-exit()
+# print("++++++++++++++++++++++++++++++++++++++++")
+# print(MetricDistance(Calculations().haversine(
+#     LatLong(12.9739697, 80.2151917), LatLong(12.9794559, 80.2222834))))
+# print("-----------------------------------------")
+# print("Bye")
+# exit()
+
+# mys = boto3.session.Session(
+#     aws_access_key_id='AKIA4NWNR6RKLLQXECEN', aws_secret_access_key='DsspNdp62GLSoK2xDLrSPaQyqW7Wz1iK92iL2h', region_name='ap-south-1')
+# myr = mys.region_name
+# client = mys.client('s3', aws_access_key_id='AKIA4NWNR6RKLLQXECEN', aws_secret_access_key='DsspNdp62GLSoK2xDLrSPaQyqW7Wz1iK92iL2h',
+#                     region_name='ap-south-1', config=Config(signature_version='s3v4'))
+# s3 = boto3.resource('s3')
+# for bucket in s3.buckets.all():
+#     print(bucket.name)
 
 mc = pm.MongoClient("mongodb://localhost:27017")
 db = mc['local']
@@ -1049,9 +1050,11 @@ def getTestResults():
                 res = []
                 for i in a:
                     c = col.find_one({'_id': ObjectId(i[0])})
-                    d = c.pop('_id', None)
+                    d = 0
+                    if c != None:
+                        d = c.pop('_id', None)
+                        res.append(c)
                     print(d)
-                    res.append(c)
                 b = {"success": True, "status": True,
                      "message": "Test Results List", "result": str(res)}
                 response.body = str(b)
@@ -1078,44 +1081,44 @@ def getTestResults():
     return rb
 
 
-@app.post('/postToS3')
-@enable_cors
-def postFileToS3():
-    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
-    try:
-        data = request.files['file']
-        folder = ''
-        fps = os.path.join("temp", data.filename)
-        if fps.endswith(".jpg") or fps.endswith(".png") or fps.endswith(".svg"):
-            folder = 'img/'
-        elif fps.endswith(".pdf"):
-            folder = 'pdf/'
-        elif fps.endswith(".doc") or fps.endswith(".docx"):
-            folder = 'doc/'
-        data.save(fps)
-        client.upload_file(fps, 'gene-onto', folder +
-                           '{}'.format(data.filename))
-        os.remove(fps)
-        d = client.generate_presigned_post(
-            Bucket='gene-onto',
-            Key=folder + data.filename
-        )
-        url = client.generate_presigned_url('get_object', Params={  #
-            'Bucket': 'gene-onto', 'Key': folder + data.filename}, ExpiresIn=604800)
-        print(fps)
-        print(d)
-        print(url.lower())
-        url = "https://s3-" + myr + ".amazonaws.com/gene-onto/" + folder + data.filename
-        response.body = str(
-            {"success": True, "status": True, "message": "Document Posted to Bucket Successfully", "location": url})
-    except Exception as e:
-        error = e.args[0].split('\n')[0]
-        response.body = str(
-            {"success": False, "status": False, "message": error})
-    return ast.literal_eval(response.body)
+# @app.post('/postToS3')
+# @enable_cors
+# def postFileToS3():
+#     response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+#     try:
+#         data = request.files['file']
+#         folder = ''
+#         fps = os.path.join("temp", data.filename)
+#         if fps.endswith(".jpg") or fps.endswith(".png") or fps.endswith(".svg"):
+#             folder = 'img/'
+#         elif fps.endswith(".pdf"):
+#             folder = 'pdf/'
+#         elif fps.endswith(".doc") or fps.endswith(".docx"):
+#             folder = 'doc/'
+#         data.save(fps)
+#         client.upload_file(fps, 'gene-onto', folder +
+#                            '{}'.format(data.filename))
+#         os.remove(fps)
+#         d = client.generate_presigned_post(
+#             Bucket='gene-onto',
+#             Key=folder + data.filename
+#         )
+#         url = client.generate_presigned_url('get_object', Params={  #
+#             'Bucket': 'gene-onto', 'Key': folder + data.filename}, ExpiresIn=604800)
+#         print(fps)
+#         print(d)
+#         print(url.lower())
+#         url = "https://s3-" + myr + ".amazonaws.com/gene-onto/" + folder + data.filename
+#         response.body = str(
+#             {"success": True, "status": True, "message": "Document Posted to Bucket Successfully", "location": url})
+#     except Exception as e:
+#         error = e.args[0].split('\n')[0]
+#         response.body = str(
+#             {"success": False, "status": False, "message": error})
+#     return ast.literal_eval(response.body)
 
 
 if __name__ == "__main__":
     app.install(CorsPlugin(
         origins=['http://localhost:8080/#/', 'http://localhost:8080/', 'http://localhost:8080']))
-    app.run(host='127.0.0.1', port='8000', reloader=True)
+    app.run(host='127.0.0.1', port='8000', reloader=True,debug = True)
