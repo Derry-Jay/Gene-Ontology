@@ -11,19 +11,48 @@ from bson.objectid import ObjectId
 from models.latlong import LatLong
 from models.distance import MetricDistance
 from operations.calculate import Calculations
+from operations.misc_ops import OtherOperations
+from operations.corroboration import Corroboration
 from truckpad.bottle.cors import CorsPlugin, enable_cors
 from bottle import Bottle, request, response, post, get, put, delete, run
 app = Bottle(__name__)
 emailpattern = re.compile(r'^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$')
 passwordpattern = re.compile(
     r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!#%*?&]{6,20}$')
-
+mop = OtherOperations()
+calc = Calculations()
 # print("++++++++++++++++++++++++++++++++++++++++")
 # print(MetricDistance(Calculations().haversine(
 #     LatLong(12.9739697, 80.2151917), LatLong(12.9794559, 80.2222834))))
 # print("-----------------------------------------")
 # print("Bye")
 # exit()
+
+
+# '''update public.diseases set disease=%s , disease_category_id= %s, disease_image_url=%s where disease_id=%s'''
+# cqs+
+# cur.execute('''insert into public.registered_users(user_name, user_mail, pincode, password) values (%s , %s )''', ())
+# cur.execute('''select count(user_id) from public.registered_users where user_email=%s and password=%s''')
+# @app.delete
+# @app.
+# @app.
+# @app.
+# @app.
+# ast.literal_eval(request.body.read().decode('utf8'))
+# ud1 = (data['password'],
+#        data['date_of_birth'], data['gender'], data['user_email'], data['mobile_number'], data['user_name'])
+# cur.execute('''update public.registered_users set user_name=%s, password=%s, date_of_birth=%s, gender=%s, user_email=%s, mobile_number=%s where user_id=%s''', ud1)
+# '''update public.genes set gene=%s where gene_id=%s'''
+# and and = and
+# ll = LatLong()
+# cur.execute('''select count(user_id) from public.registered_users where user_email=%s and password=%s''', ud)
+# '''update public.symptoms set symptom=%s where symptom_id=%s'''
+
+mc = pm.MongoClient("mongodb://localhost:27017")
+db = mc['local']
+col = db['gene_test_results']
+con = pypg.connect(user='postgres', password='password', database='postgres')
+cur = con.cursor()
 
 # mys = boto3.session.Session(
 #     aws_access_key_id='AKIA4NWNR6RKLLQXECEN', aws_secret_access_key='DsspNdp62GLSoK2xDLrSPaQyqW7Wz1iK92iL2h', region_name='ap-south-1')
@@ -33,96 +62,6 @@ passwordpattern = re.compile(
 # s3 = boto3.resource('s3')
 # for bucket in s3.buckets.all():
 #     print(bucket.name)
-
-mc = pm.MongoClient("mongodb://localhost:27017")
-db = mc['local']
-col = db['gene_test_results']
-con = pypg.connect(user='postgres', password='password', database='postgres')
-cur = con.cursor()
-
-
-def generateUpdateStatement(tableName, data):
-    snt = '''update ''' + tableName + ''' set '''
-    k = 0
-    pk = ''
-    for i in data.keys():
-        if re.search('_id', i) is None:
-            snt += (i + '''=%s''')
-            if k < len(data.keys()) - 2:
-                snt += ''', '''
-            else:
-                snt += ''' '''
-            k += 1
-        else:
-            pk = re.search('_id', i).string
-    snt += ('''where ''' + pk + '''=%s''')
-    return snt
-
-
-def generateCountStatement(tableName, data, primaryKey):
-    cqs = '''select count(''' + primaryKey + ''') from ''' + \
-        tableName + ''' where '''
-    k = 0
-    for i in data.keys():
-        if re.search('_id', i) is None:
-            cqs += (i + '''=%s''')
-            if k < len(data.keys()) - 1:
-                cqs += ''' and '''
-            k += 1
-    return cqs
-
-
-def generateInsertStatement(tableName, data):
-    inst = '''insert into ''' + tableName + '''('''
-    k = 0
-    for i in data.keys():
-        inst += i
-        if k < len(data.keys()) - 1:
-            inst += ''', '''
-        else:
-            inst += ''') '''
-        k += 1
-    inst += '''values('''
-    for i in range(len(data.keys())):
-        inst += '''%s'''
-        if i < len(data.keys()) - 1:
-            inst += ''', '''
-        else:
-            inst += ''')'''
-    return inst
-
-
-def getListFromDict(data):
-    g = []
-    pk = ''
-    for i in data.keys():
-        if re.search('_id', i) is None:
-            g.append(data[i])
-        else:
-            pk = re.search('_id', i).string
-    if pk != '':
-        g.append(data[pk])
-    return g
-
-
-# ''' and and = and'''
-# cqs+
-# cur.execute('''insert into public.registered_users(user_name, user_mail, pincode, password) values (%s , %s )''', ())
-# cur.execute('''''')
-# @app.delete
-# @app.
-# @app.
-# @app.
-# @app.
-# ast.literal_eval(request.body.read().decode('utf8'))
-# ud1 = (data['password'],
-#        data['date_of_birth'], data['gender'], data['user_email'], data['mobile_number'], data['user_name'])
-# cur.execute(
-#     '''update public.registered_users set user_name=%s, password=%s, date_of_birth=%s, gender=%s, user_email=%s, mobile_number=%s where user_id=%s''', ud1)
-# '''select count(user_id) from public.registered_users where user_email=%s and password=%s'''
-# ll = LatLong()
-# cur.execute(
-#     '''select count(user_id) from public.registered_users where user_email=%s and password=%s''', ud)
 
 
 @app.post('/login')
@@ -139,7 +78,7 @@ def login():
             raise ValueError
         try:
             if ('user_email' in data.keys() and 'password' in data.keys()):
-                cs = generateCountStatement(
+                cs = mop.generateCountStatement(
                     'public.registered_users', data, 'user_id')
                 ud = (data['user_email'], data['password'])
                 try:
@@ -150,19 +89,17 @@ def login():
                             cur.execute(
                                 '''select user_id,user_name,user_type_id from public.registered_users where user_email = %s and password = %s''', ud)
                             q = cur.fetchone()
-                            tk = auth.BaseAuthBackend()
-                            print(tk)
-                            aut = tk.authenticate_user(
-                                ud[0], ud[1])
+                            tk = Corroboration()
+                            aut = tk.authenticate_user(ud[0], ud[1])
+                            print(aut)
                             v = {"success": True, "status": True, "message": "Logged In Successfully",
                                  "user_id": q[0], "user_name": q[1], "user_type": q[2]}
                             response.body = str(v)
                         except Exception as e:
-                            error = e.args[0].split('\n')[0]
                             print(e)
-                            response.status_code = 500
+                            response.status = 500
                             response.body = str(
-                                {"success": False, "status": False, "message": error})
+                                {"success": False, "status": False, "message": str(e)})
                     else:
                         response.body = str(
                             {"success": False, "status": False, "message": "User Does Not Exist"})
@@ -212,7 +149,7 @@ def register():
             if 'user_name' in data.keys() and 'password' in data.keys() and 'user_type' in data.keys() and 'user_email' in data.keys() and 'pincode' in data.keys() and 'gender' in data.keys() and 'mobile_number' in data.keys() and 'country' in data.keys() and emailpattern.match(data['user_email']) != None and passwordpattern.match(data['password']) != None:
                 ud = (data['user_name'], data['user_type'],
                       data['user_email'], data['password'], data['mobile_number'])
-                cs = generateCountStatement(
+                cs = mop.generateCountStatement(
                     'public.registered_users', data, 'user_id')
                 cur.execute(cs, ud)
                 if cur.fetchone()[0] == 0:
@@ -306,9 +243,8 @@ def updateUserData():
         if data is None or data == {}:
             raise ValueError
         elif 'user_id' in data.keys():
-            cqs = generateUpdateStatement(
-                'public.registered_users', data)
-            ud2 = getListFromDict(data)
+            cqs = mop.generateUpdateStatement('public.registered_users', data)
+            ud2 = mop.getListFromDict(data)
             try:
                 cur.execute(cqs, ud2)
                 con.commit()
@@ -621,8 +557,8 @@ def updateDisease():
             try:
                 d1 = (data['disease'], data['disease_category_id'], data['disease_image_url'],
                       data['disease_id'])
-                cur.execute(
-                    '''update public.diseases set disease=%s , disease_category_id= %s, disease_image_url=%s where disease_id=%s''', d1)
+                qs = mop.generateUpdateStatement('public.diseases', data)
+                cur.execute(qs, d1)
                 con.commit()
                 response.body = str(
                     {"success": True, "status": True, "message": "Disease Updated Successfully"})
@@ -774,8 +710,9 @@ def updateGene():
             raise ValueError
         elif 'gene' in data.keys() and 'gene_id' in data.keys():
             try:
-                cur.execute('''update public.genes set gene=%s where gene_id=%s''',
-                            (data['gene'], data['gene_id']))
+                gd = (data['gene'], data['gene_id'])
+                qs = mop.generateUpdateStatement('public.genes', data)
+                cur.execute(qs, gd)
                 con.commit()
                 response.body = str(
                     {"success": True, "status": True, "message": "Gene Updated Successfully"})
@@ -874,8 +811,9 @@ def updateSymptom():
             raise ValueError
         elif 'symptom' in data.keys() and 'symptom_id' in data.keys():
             try:
-                cur.execute(
-                    '''update public.symptoms set symptom=%s where symptom_id=%s''', (data['symptom'], data['symptom_id']))
+                sd = (data['symptom'], data['symptom_id'])
+                qs = mop.generateUpdateStatement('public.symptoms', data)
+                cur.execute(qs, sd)
                 con.commit()
                 response.body = str(
                     {"success": True, "status": True, "message": "Symptom Updated Successfully"})
@@ -974,7 +912,7 @@ def getDocumentList():
 @enable_cors
 def getPatientsList():
     try:
-        cur.execute('''select user_name, date_of_birth, gender, mobile_number, user_email, pincode, user_type from public.registered_users where user_type=%s''', ("0",))
+        cur.execute('''select user_name, date_of_birth, gender, mobile_number, user_email, pincode, user_type from public.registered_users where user_type_id=%s''', ("0",))
         d = [dict(zip([col[0] for col in cur.description], row))
              for row in cur]
         for i in d:
