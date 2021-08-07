@@ -66,7 +66,7 @@ def generateCountStatement(tableName, data, primaryKey):
     for i in data.keys():
         if re.search('_id', i) is None:
             cqs += (i + '''=%s''')
-            if k < len(data.keys()) - 2:
+            if k < len(data.keys()) - 1:
                 cqs += ''' and '''
             k += 1
     return cqs
@@ -105,10 +105,9 @@ def getListFromDict(data):
     return g
 
 
-# '''select count(user_id) from public.registered_users where user_name=%s and user_type=%s and user_email=%s and password=%s and mobile_number=%s''' and and = and
+# ''' and and = and'''
 # cqs+
 # cur.execute('''insert into public.registered_users(user_name, user_mail, pincode, password) values (%s , %s )''', ())
-# cur.execute('''''')
 # cur.execute('''''')
 # @app.delete
 # @app.
@@ -122,8 +121,8 @@ def getListFromDict(data):
 #     '''update public.registered_users set user_name=%s, password=%s, date_of_birth=%s, gender=%s, user_email=%s, mobile_number=%s where user_id=%s''', ud1)
 # '''select count(user_id) from public.registered_users where user_email=%s and password=%s'''
 # ll = LatLong()
-    # print("++++++++++++++++++++++++++++++++++++++++")
-    # print()
+# cur.execute(
+#     '''select count(user_id) from public.registered_users where user_email=%s and password=%s''', ud)
 
 
 @app.post('/login')
@@ -149,15 +148,19 @@ def login():
                     if a == 1:
                         try:
                             cur.execute(
-                                '''select user_id,user_name,user_type from public.registered_users where user_email = %s and password = %s''', ud)
+                                '''select user_id,user_name,user_type_id from public.registered_users where user_email = %s and password = %s''', ud)
                             q = cur.fetchone()
-                            tk = auth.BaseAuthBackend.authenticate_user(
+                            tk = auth.BaseAuthBackend()
+                            print(tk)
+                            aut = tk.authenticate_user(
                                 ud[0], ud[1])
                             v = {"success": True, "status": True, "message": "Logged In Successfully",
                                  "user_id": q[0], "user_name": q[1], "user_type": q[2]}
                             response.body = str(v)
                         except Exception as e:
                             error = e.args[0].split('\n')[0]
+                            print(e)
+                            response.status_code = 500
                             response.body = str(
                                 {"success": False, "status": False, "message": error})
                     else:
@@ -220,7 +223,7 @@ def register():
                         user_data = (data['user_name'],
                                      data['user_type'], data['date_of_birth'], data['gender'], data['mobile_number'], data['user_email'], x['latitude'], x['longitude'], data['password'])
                         cur.execute(
-                            '''insert into public.registered_users(user_name, user_type, date_of_birth, gender, mobile_number, user_email, latitude, longitude, password) values(%s , %s , %s , %s , %s , %s , %s , %s , %s)''', user_data)
+                            '''insert into public.registered_users(user_name, user_type_id, date_of_birth, gender_id, mobile_number, user_email, latitude, longitude, password) values(%s , %s , %s , %s , %s , %s , %s , %s , %s)''', user_data)
                         con.commit()
                         cur.execute(
                             '''select user_id from public.registered_users where user_name=%s and user_type=%s and date_of_birth=%s and gender=%s and mobile_number=%s and user_email=%s and latitude=%s and longitude=%s and password=%s''', user_data)
@@ -1054,7 +1057,6 @@ def getTestResults():
                     if c != None:
                         d = c.pop('_id', None)
                         res.append(c)
-                    print(d)
                 b = {"success": True, "status": True,
                      "message": "Test Results List", "result": str(res)}
                 response.body = str(b)
@@ -1121,4 +1123,4 @@ def getTestResults():
 if __name__ == "__main__":
     app.install(CorsPlugin(
         origins=['http://localhost:8080/#/', 'http://localhost:8080/', 'http://localhost:8080']))
-    app.run(host='127.0.0.1', port='8000', reloader=True,debug = True)
+    app.run(host='127.0.0.1', port='8000', reloader=True, debug=True)
