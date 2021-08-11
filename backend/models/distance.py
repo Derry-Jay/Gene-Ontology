@@ -49,4 +49,3 @@ class MetricDistance:
 
     def __str__(self):
         return str(round(self.km + (self.m/1000), 3)) + " Kilometres"
-
