@@ -25,14 +25,13 @@ calc = Calculations()
 # print(MetricDistance(Calculations().haversine(
 #     LatLong(12.9739697, 80.2151917), LatLong(12.9794559, 80.2222834))))
 # print("-----------------------------------------")
-# print("Bye")
 # exit()
 
 
 # '''update public.diseases set disease=%s , disease_category_id= %s, disease_image_url=%s where disease_id=%s'''
 # cqs+
 # cur.execute('''insert into public.registered_users(user_name, user_mail, pincode, password) values (%s , %s )''', ())
-# cur.execute('''select count(user_id) from public.registered_users where user_email=%s and password=%s''')
+# cur.execute('''update public.symptoms set symptom=%s where symptom_id=%s''')
 # @app.delete
 # @app.
 # @app.
@@ -41,12 +40,11 @@ calc = Calculations()
 # ast.literal_eval(request.body.read().decode('utf8'))
 # ud1 = (data['password'],
 #        data['date_of_birth'], data['gender'], data['user_email'], data['mobile_number'], data['user_name'])
-# cur.execute('''update public.registered_users set user_name=%s, password=%s, date_of_birth=%s, gender=%s, user_email=%s, mobile_number=%s where user_id=%s''', ud1)
 # '''update public.genes set gene=%s where gene_id=%s'''
-# and and = and
+# where = where where
 # ll = LatLong()
 # cur.execute('''select count(user_id) from public.registered_users where user_email=%s and password=%s''', ud)
-# '''update public.symptoms set symptom=%s where symptom_id=%s'''
+#
 
 mc = pm.MongoClient("mongodb://localhost:27017")
 db = mc['local']
@@ -77,21 +75,21 @@ def login():
         if data is None:
             raise ValueError
         try:
-            if ('user_email' in data.keys() and 'password' in data.keys()):
+            if ((('user_email' in data.keys() and 'password' in data.keys()) or 'mobile_number' in data.keys()) and 'device_token' in data.keys()):
                 cs = mop.generateCountStatement(
                     'public.registered_users', data, 'user_id')
-                ud = (data['user_email'], data['password'])
+                ud = mop.getListFromDict(data)
                 try:
                     cur.execute(cs, ud)
                     a = cur.fetchone()[0]
                     if a == 1:
                         try:
                             cur.execute(
-                                '''select user_id,user_name,user_type_id from public.registered_users where user_email = %s and password = %s''', ud)
+                                '''select device_token,user_name,user_type_id from public.registered_users where user_email = %s and password = %s''', ud)
                             q = cur.fetchone()
-                            tk = Corroboration()
-                            aut = tk.authenticate_user(ud[0], ud[1])
-                            print(aut)
+                            # tk = Corroboration()
+                            # aut = tk.authenticate_user(ud[0], ud[1])
+                            # print(aut)
                             v = {"success": True, "status": True, "message": "Logged In Successfully",
                                  "user_id": q[0], "user_name": q[1], "user_type": q[2]}
                             response.body = str(v)
@@ -196,11 +194,11 @@ def getUserDetails():
             request.body.read().decode('utf8'))
         if data is None or data == {}:
             raise ValueError
-        elif 'user_id' in data.keys():
+        elif 'device_token' in data.keys():
             try:
-                q = (data['user_id'],)
+                q = mop.getListFromDict(data)
                 cur.execute(
-                    '''select user_name, user_type, date_of_birth, gender, mobile_number, user_email, latitude, longitude from public.registered_users where user_id=%s''', q)
+                    '''select U.user_name, T.user_type, U.date_of_birth, G.gender, U.mobile_number, U.user_email, U.latitude, U.longitude from public.registered_users U inner join public.genders G on U.gender_id = G.gender_id inner join public.user_types T on U.user_type_id = T.user_type_id and U.device_token=%s''', q)
                 dft = [dict(zip([col[0] for col in cur.description], row))
                        for row in cur]
                 if dft is not None and dft != []:
@@ -877,10 +875,10 @@ def getDocumentList():
             request.body.read().decode('utf8'))
         if data is None or data == {}:
             raise ValueError
-        elif 'user_id' in data.keys():
+        elif 'device_token' in data.keys():
             try:
                 cur.execute(
-                    '''select doc_id,doc_type, doc_url from public.documents where user_id=%s''', (data['user_id'],))
+                    '''select D.doc_id,D.doc_type, D.doc_url from public.documents D left join public.registered_users U on D.user_id = U.user_id and U.device_token=%s''', (data['device_token'],))
                 d = [dict(zip([col[0] for col in cur.description], row))
                      for row in cur]
                 b = {"success": True, "status": True,
@@ -912,7 +910,7 @@ def getDocumentList():
 @enable_cors
 def getPatientsList():
     try:
-        cur.execute('''select user_name, date_of_birth, gender, mobile_number, user_email, pincode, user_type from public.registered_users where user_type_id=%s''', ("0",))
+        cur.execute('''select U.user_name, U.date_of_birth, G.gender, U.mobile_number, U.user_email, U.pincode from public.registered_users U inner join genders G on U.gender_id = G.gender_id and user_type_id=%s''', ("0",))
         d = [dict(zip([col[0] for col in cur.description], row))
              for row in cur]
         for i in d:
@@ -983,10 +981,10 @@ def getTestResults():
             request.body.read().decode('utf8'))
         if data is None or data == {}:
             raise ValueError
-        elif 'user_id' in data.keys():
+        elif 'device_token' in data.keys():
             try:
                 cur.execute(
-                    '''select result_id from public.user_test_results where user_id=%s''', (data['user_id'],))
+                    '''select R.result_id from public.user_test_results R left join public.registered_users U on R.user_id = U.user_id and U.device_token=%s''', (data['device_token'],))
                 a = cur.fetchall()
                 res = []
                 for i in a:
@@ -1021,41 +1019,29 @@ def getTestResults():
     return rb
 
 
-# @app.post('/postToS3')
-# @enable_cors
-# def postFileToS3():
-#     response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
-#     try:
-#         data = request.files['file']
-#         folder = ''
-#         fps = os.path.join("temp", data.filename)
-#         if fps.endswith(".jpg") or fps.endswith(".png") or fps.endswith(".svg"):
-#             folder = 'img/'
-#         elif fps.endswith(".pdf"):
-#             folder = 'pdf/'
-#         elif fps.endswith(".doc") or fps.endswith(".docx"):
-#             folder = 'doc/'
-#         data.save(fps)
-#         client.upload_file(fps, 'gene-onto', folder +
-#                            '{}'.format(data.filename))
-#         os.remove(fps)
-#         d = client.generate_presigned_post(
-#             Bucket='gene-onto',
-#             Key=folder + data.filename
-#         )
-#         url = client.generate_presigned_url('get_object', Params={  #
-#             'Bucket': 'gene-onto', 'Key': folder + data.filename}, ExpiresIn=604800)
-#         print(fps)
-#         print(d)
-#         print(url.lower())
-#         url = "https://s3-" + myr + ".amazonaws.com/gene-onto/" + folder + data.filename
-#         response.body = str(
-#             {"success": True, "status": True, "message": "Document Posted to Bucket Successfully", "location": url})
-#     except Exception as e:
-#         error = e.args[0].split('\n')[0]
-#         response.body = str(
-#             {"success": False, "status": False, "message": error})
-#     return ast.literal_eval(response.body)
+@app.post('/logout')
+@enable_cors
+def logout():
+    try:
+        data = ast.literal_eval(
+            request.body.read().decode('utf8')) if request.json is None else request.json
+        sqs = mop.generateSelectStatement(
+            'public.registered_users', ['user_id'], data)
+        ldt = mop.getListFromDict(data)
+        cur.execute(sqs, ldt)
+        uid = cur.fetchone()[0]
+        udt = ("", uid)
+        cur.execute('''update public.registered_users set device_token=%s where user_id=%s''', udt)
+        con.commit()
+        response.body = str(
+            {"success": True, "status": True, "message": "Logged out Successfully"})
+    except Exception as e:
+        error = e.args[0].split('\n')[0]
+        print(e.args)
+        response.body = str(
+            {"success": False, "status": False, "message": error})
+    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+    return ast.literal_eval(response.body)
 
 
 if __name__ == "__main__":

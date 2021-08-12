@@ -2,6 +2,25 @@ import re
 
 
 class OtherOperations:
+
+    def generateSelectStatement(self,tableName,attributes,data=None):
+        sst = '''select '''
+        j = 0
+        for i in attributes:
+            sst += i
+            if j < len(attributes) -1:
+                sst+=''', '''
+            j+=1
+        sst += ''' from ''' + tableName
+        j=0
+        if data != None and len(data.keys()) != 0:
+            sst += ''' where '''
+            for k in data.keys():
+                sst += (k + '''=%s ''')
+                if j < len(data.keys()) -1:
+                    sst += '''and '''
+        return sst    
+
     def generateUpdateStatement(self, tableName, data):
         ust = '''update ''' + tableName + ''' set'''
         k = 0
