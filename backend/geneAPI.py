@@ -31,7 +31,6 @@ calc = Calculations()
 # '''update public.diseases set disease=%s , disease_category_id= %s, disease_image_url=%s where disease_id=%s'''
 # cqs+
 # cur.execute('''insert into public.registered_users(user_name, user_mail, pincode, password) values (%s , %s )''', ())
-# cur.execute('''update public.symptoms set symptom=%s where symptom_id=%s''')
 # @app.delete
 # @app.
 # @app.
@@ -40,11 +39,9 @@ calc = Calculations()
 # ast.literal_eval(request.body.read().decode('utf8'))
 # ud1 = (data['password'],
 #        data['date_of_birth'], data['gender'], data['user_email'], data['mobile_number'], data['user_name'])
-# '''update public.genes set gene=%s where gene_id=%s'''
-# where = where where
-# ll = LatLong()
-# cur.execute('''select count(user_id) from public.registered_users where user_email=%s and password=%s''', ud)
 #
+# where where
+
 
 mc = pm.MongoClient("mongodb://localhost:27017")
 db = mc['local']
@@ -75,36 +72,45 @@ def login():
         if data is None:
             raise ValueError
         try:
+            cs = ''''''
+            dts = ''''''
+            ids = ''''''
+            b = 0
+            ud = []
             if ((('user_email' in data.keys() and 'password' in data.keys()) or 'mobile_number' in data.keys()) and 'device_token' in data.keys()):
-                cs = mop.generateCountStatement(
-                    'public.registered_users', data, 'user_id')
-                ud = mop.getListFromDict(data)
-                try:
-                    cur.execute(cs, ud)
-                    a = cur.fetchone()[0]
-                    if a == 1:
-                        try:
-                            cur.execute(
-                                '''select device_token,user_name,user_type_id from public.registered_users where user_email = %s and password = %s''', ud)
-                            q = cur.fetchone()
-                            # tk = Corroboration()
-                            # aut = tk.authenticate_user(ud[0], ud[1])
-                            # print(aut)
-                            v = {"success": True, "status": True, "message": "Logged In Successfully",
-                                 "user_id": q[0], "user_name": q[1], "user_type": q[2]}
-                            response.body = str(v)
-                        except Exception as e:
-                            print(e)
-                            response.status = 500
-                            response.body = str(
-                                {"success": False, "status": False, "message": str(e)})
-                    else:
+                if 'mobile_number' in data.keys() and 'device_token' in data.keys():
+                    cs = '''select count(user_id) from public.registered_users where mobile_number = %s'''
+                    ud = (data['mobile_number'], )
+                    dts = '''select device_token from public.registered_users where mobile_number=%s'''
+                    ids = '''select user_id from public.registered_users where mobile_number=%s'''
+                elif 'user_email' in data.keys() and 'password' in data.keys() and 'device_token' in data.keys():
+                    cs = '''select count(user_id) from public.registered_users where user_email=%s and password=%s'''
+                    ud = (data['user_email'], data['password'])
+                    dts = '''select device_token from public.registered_users where user_email=%s and password=%s'''
+                    ids = '''select user_id from public.registered_users where user_email=%s and password=%s'''
+                cur.execute(cs, ud)
+                a = cur.fetchone()[0]
+                if a == 1:
+                    cur.execute(ids, ud)
+                    id = cur.fetchone()[0]
+                    cur.execute(dts, ud)
+                    dt = cur.fetchone()[0]
+                    if len(dt) == 0:
+                        cur.execute(
+                            '''update public.registered_users set device_token=%s where user_id=%s''', (data['device_token'], id))
+                        con.commit()
+                        cur.execute(
+                            '''select user_type_id from public.registered_users where user_id=%s''', (id,))
+                        b = cur.fetchone()[0]
                         response.body = str(
-                            {"success": False, "status": False, "message": "User Does Not Exist"})
-                except Exception as e:
-                    error = e.args[0].split('\n')[0]
-                    response.body = str(
-                        {"success": False, "status": False, "message": error})
+                            {"success": True, "status": True, "message": "Logged in Successfully", "user_type": b})
+
+                    else:
+                        if dt == data['device_token']:
+                            cur.execute(
+                                '''select user_type_id from public.registered_users where user_id=%s''', (id,))
+                            response.body = str(
+                                {"success": True, "status": True, "message": "Logged in Successfully", "user_type": b})
             else:
                 raise KeyError
         except (TypeError, KeyError):
@@ -275,10 +281,10 @@ def deleteUser():
             request.body.read().decode('utf8'))
         if data is None or data == {}:
             raise ValueError
-        elif 'user_id' in data.keys():
+        elif 'device_token' in data.keys():
             try:
                 cur.execute(
-                    '''delete from public.registered_users where user_id=%s''', (data['user_id'],))
+                    '''delete from public.registered_users where device_token=%s''', (data['device_token'],))
                 con.commit()
                 response.body = str(
                     {"success": True, "status": True, "message": "User Deleted Successfully"})
@@ -1031,7 +1037,8 @@ def logout():
         cur.execute(sqs, ldt)
         uid = cur.fetchone()[0]
         udt = ("", uid)
-        cur.execute('''update public.registered_users set device_token=%s where user_id=%s''', udt)
+        cur.execute(
+            '''update public.registered_users set device_token=%s where user_id=%s''', udt)
         con.commit()
         response.body = str(
             {"success": True, "status": True, "message": "Logged out Successfully"})
