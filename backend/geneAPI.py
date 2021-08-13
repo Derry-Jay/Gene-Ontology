@@ -39,7 +39,7 @@ calc = Calculations()
 # ast.literal_eval(request.body.read().decode('utf8'))
 # ud1 = (data['password'],
 #        data['date_of_birth'], data['gender'], data['user_email'], data['mobile_number'], data['user_name'])
-#
+# (, KeyError)
 # where where
 
 
@@ -77,7 +77,7 @@ def login():
             ids = ''''''
             b = 0
             ud = []
-            if ((('user_email' in data.keys() and 'password' in data.keys()) or 'mobile_number' in data.keys()) and 'device_token' in data.keys()):
+            if ((('user_email' in data.keys() and 'password' in data.keys() and 'mobile_number' not in data.keys()) or ('user_email' not in data.keys() and 'password' not in data.keys() and 'mobile_number' in data.keys())) and 'device_token' in data.keys()):
                 if 'mobile_number' in data.keys() and 'device_token' in data.keys():
                     cs = '''select count(user_id) from public.registered_users where mobile_number = %s'''
                     ud = (data['mobile_number'], )
@@ -92,28 +92,34 @@ def login():
                 a = cur.fetchone()[0]
                 if a == 1:
                     cur.execute(ids, ud)
-                    id = cur.fetchone()[0]
+                    uid = cur.fetchone()[0]
                     cur.execute(dts, ud)
                     dt = cur.fetchone()[0]
                     if len(dt) == 0:
                         cur.execute(
-                            '''update public.registered_users set device_token=%s where user_id=%s''', (data['device_token'], id))
+                            '''update public.registered_users set device_token=%s where user_id=%s''', (data['device_token'], uid))
                         con.commit()
                         cur.execute(
-                            '''select user_type_id from public.registered_users where user_id=%s''', (id,))
+                            '''select user_type_id from public.registered_users where user_id=%s''', (uid,))
                         b = cur.fetchone()[0]
                         response.body = str(
                             {"success": True, "status": True, "message": "Logged in Successfully", "user_type": b})
 
+                    elif dt == data['device_token']:
+                        cur.execute(
+                            '''select user_type_id from public.registered_users where user_id=%s''', (uid,))
+                        b = cur.fetchone()[0]
+                        response.body = str(
+                            {"success": True, "status": True, "message": "Logged in Successfully", "user_type": b})
                     else:
-                        if dt == data['device_token']:
-                            cur.execute(
-                                '''select user_type_id from public.registered_users where user_id=%s''', (id,))
-                            response.body = str(
-                                {"success": True, "status": True, "message": "Logged in Successfully", "user_type": b})
+                        response.body = str(
+                            {"success": True, "status": False, "message": "User is Already Logged In"})
+                else:
+                    response.body = str(
+                        {"success": True, "status": False, "message": "User is not Registered"})
             else:
                 raise KeyError
-        except (TypeError, KeyError):
+        except TypeError:
             raise ValueError
 
     except ValueError:
@@ -122,13 +128,21 @@ def login():
 
     except KeyError:
         response.status = 409
-        response.headers['Content-Type'] = 'application/json'
-        if 'user_email' in data.keys() and data['user_email'] != "" and 'password' not in data.keys():
+        if ('user_email' in data.keys() or 'password' in data.keys()) and 'mobile_number' in data.keys():
             response.body = str(
-                {"success": False, "status": False, "message": "Please Provide Password"})
-        elif 'password' in data.keys() and data['password'] != "" and 'user_email' not in data.keys():
+                {"success": False, "status": False, "message": "Ambiguous Login"})
+        elif 'user_email' in data.keys() and data['user_email'] != "" and 'password' not in data.keys() and 'device_token' not in data.keys() and 'mobile_number' not in data.keys():
             response.body = str(
-                {"success": False, "status": False, "message": "Please Provide Email"})
+                {"success": False, "status": False, "message": "Please Provide Password and Device Token"})
+        elif 'password' in data.keys() and data['password'] != "" and 'user_email' not in data.keys() and 'device_token' not in data.keys() and 'mobile_number' not in data.keys():
+            response.body = str(
+                {"success": False, "status": False, "message": "Please Provide Email and Device Token"})
+        elif mop.logicalXOR('user_email' in data.keys() and data['user_email'] != "" and 'password' in data.keys() and data['password'] != "", 'mobile_number' in data.keys() and data['mobile_number'] != "") and 'device_token' not in data.keys():
+            response.body = str(
+                {"success": False, "status": False, "message": "Please Provide Device Token"})
+        elif 'device_token' in data.keys() and data['device_token'] != "" and not(mop.logicalXOR(('user_email' in data.keys() and 'password' in data.keys()), 'mobile_number' in data.keys())):
+            response.body = str(
+                {"success": False, "status": False, "message": "Please Provide either Email and Password or Mobile Number"})
         else:
             response.body = str(
                 {"success": False, "status": False, "message": "Please Provide The Necessary Parameters"})
@@ -138,8 +152,8 @@ def login():
     return ast.literal_eval(response.body)
 
 
-@app.post('/register')
-@enable_cors
+@ app.post('/register')
+@ enable_cors
 def register():
     try:
         try:
@@ -383,29 +397,33 @@ def addDiseaseCategory():
             request.body.read().decode('utf8'))
         if data is None or data == {}:
             raise ValueError
-        elif 'disease_category' in data.keys():
+        elif 'disease_category' in data.keys() and 'user_type' in data.keys():
             try:
                 dt = (data['disease_category'].lower(),)
                 cur.execute(
                     '''select count(disease_category_id) from public.disease_categories where disease_category=%s''', dt)
                 b = cur.fetchone()[0]
-                if b == 0:
-                    try:
-                        cur.execute(
-                            '''insert into public.disease_categories(disease_category) values(%s)''', dt)
-                        con.commit()
-                        cur.execute(
-                            '''select disease_category_id from public.disease_categories where disease_category=%s''', (data['disease_category'],))
-                        c = cur.fetchone()[0]
+                if data['user_type'] in (1, 2):
+                    if b == 0:
+                        try:
+                            cur.execute(
+                                '''insert into public.disease_categories(disease_category) values(%s)''', dt)
+                            con.commit()
+                            cur.execute(
+                                '''select disease_category_id from public.disease_categories where disease_category=%s''', (data['disease_category'],))
+                            c = cur.fetchone()[0]
+                            response.body = str(
+                                {"success": True, "status": True, "message": "Disease Category Added Successfully", "disease_category_id": c})
+                        except Exception as e:
+                            error = e.args[0].split('\n')[0]
+                            response.body = str(
+                                {"success": False, "status": False, "message": error})
+                    else:
                         response.body = str(
-                            {"success": True, "status": True, "message": "Disease Category Added Successfully", "disease_category_id": c})
-                    except Exception as e:
-                        error = e.args[0].split('\n')[0]
-                        response.body = str(
-                            {"success": False, "status": False, "message": error})
+                            {"success": True, "status": True, "message": "Disease Category is Already Added"})
                 else:
                     response.body = str(
-                        {"success": True, "status": True, "message": "Gene is Already Added"})
+                        {"success": False, "status": False, "message": "You are restricted from Adding Disease Category"})
             except Exception as e:
                 error = e.args[0].split('\n')[0]
                 response.body = str(
@@ -498,30 +516,34 @@ def addDisease():
             request.body.read().decode('utf8'))
         if data is None or data == {}:
             raise ValueError
-        elif 'disease' in data.keys() and 'disease_image_url' in data.keys():
+        elif 'disease' in data.keys() and 'disease_image_url' in data.keys() and 'user_type' in data.keys():
             try:
                 d1 = (data['disease'].lower(), data['disease_image_url'])
                 d2 = (data['disease'].lower(),)
                 cur.execute(
                     '''select count(disease_id) from public.diseases where disease=%s''', d2)
                 f = cur.fetchone()[0]
-                if f == 0:
-                    try:
-                        cur.execute(
-                            '''insert into public.diseases(disease_category_id,disease,disease_image_url) values (%s,%s,%s)''', d1)
-                        con.commit()
-                        cur.execute(
-                            '''select disease_id from public.diseases where disease=%s''', d2)
-                        w = cur.fetchone()[0]
+                if data['user_type'] in (1, 2):
+                    if f == 0:
+                        try:
+                            cur.execute(
+                                '''insert into public.diseases(disease_category_id,disease,disease_image_url) values (%s,%s,%s)''', d1)
+                            con.commit()
+                            cur.execute(
+                                '''select disease_id from public.diseases where disease=%s''', d2)
+                            w = cur.fetchone()[0]
+                            response.body = str(
+                                {"success": True, "status": True, "message": "Disease Added Successfully", "disease_id": w})
+                        except Exception as e:
+                            error = e.args[0].split('\n')[0]
+                            response.body = str(
+                                {"success": False, "status": False, "message": error})
+                    else:
                         response.body = str(
-                            {"success": True, "status": True, "message": "Disease Added Successfully", "disease_id": w})
-                    except Exception as e:
-                        error = e.args[0].split('\n')[0]
-                        response.body = str(
-                            {"success": False, "status": False, "message": error})
+                            {"success": True, "status": True, "message": "Disease Already Added"})
                 else:
                     response.body = str(
-                        {"success": True, "status": True, "message": "Disease Already Added"})
+                        {"success": False, "status": False, "message": "You are restricted from Adding Disease"})
             except Exception as e:
                 error = e.args[0].split('\n')[0]
                 response.body = str(
@@ -626,29 +648,33 @@ def addGene():
             request.body.read().decode('utf8'))
         if data is None or data == {}:
             raise ValueError
-        elif 'gene' in data.keys():
+        elif 'gene' in data.keys() and 'user_type' in data.keys():
             try:
                 dt = (data['gene'].upper(), )
                 cur.execute(
                     '''select count(gene_id) from public.genes where gene=%s''', dt)
                 c = cur.fetchone()[0]
-                if c == 0:
-                    try:
-                        cur.execute(
-                            '''insert into public.genes(gene) values(%s)''', dt)
-                        con.commit()
-                        cur.execute(
-                            '''select gene_id from public.genes where gene=%s''', dt)
-                        d = cur.fetchone()[0]
+                if data['user_type'] in (1, 2):
+                    if c == 0:
+                        try:
+                            cur.execute(
+                                '''insert into public.genes(gene) values(%s)''', dt)
+                            con.commit()
+                            cur.execute(
+                                '''select gene_id from public.genes where gene=%s''', dt)
+                            d = cur.fetchone()[0]
+                            response.body = str(
+                                {"success": True, "status": True, "message": "Gene Added Successfully", "gene_id": d})
+                        except Exception as e:
+                            error = e.args[0].split('\n')[0]
+                            response.body = str(
+                                {"success": False, "status": False, "message": error})
+                    else:
                         response.body = str(
-                            {"success": True, "status": True, "message": "Gene Added Successfully", "gene_id": d})
-                    except Exception as e:
-                        error = e.args[0].split('\n')[0]
-                        response.body = str(
-                            {"success": False, "status": False, "message": error})
+                            {"success": True, "status": True, "message": "Gene Added Already"})
                 else:
                     response.body = str(
-                        {"success": True, "status": True, "message": "Gene Added Already"})
+                        {"success": False, "status": False, "message": "You are restricted from Adding Gene"})
             except Exception as e:
                 error = e.args[0].split('\n')[0]
                 response.body = str(
@@ -779,18 +805,22 @@ def addSymptom():
             request.body.read().decode('utf8'))
         if data == {} or data is None:
             raise ValueError
-        elif 'symptom' in data.keys():
-            try:
-                a = (data['symptom'],)
-                cur.execute(
-                    '''insert into public.symptoms(symptom) values(%s)''', a)
-                con.commit()
+        elif 'symptom' in data.keys() and 'user_type' in data.keys():
+            if data['user_type'] in (1, 2):
+                try:
+                    a = (data['symptom'],)
+                    cur.execute(
+                        '''insert into public.symptoms(symptom) values(%s)''', a)
+                    con.commit()
+                    response.body = str(
+                        {"success": True, "status": True, "message": "Symptom Added Successfully"})
+                except Exception as e:
+                    error = e.args[0].split('\n')[0]
+                    response.body = str(
+                        {"success": False, "status": False, "message": error})
+            else:
                 response.body = str(
-                    {"success": True, "status": True, "message": "Symptom Added Successfully"})
-            except Exception as e:
-                error = e.args[0].split('\n')[0]
-                response.body = str(
-                    {"success": False, "status": False, "message": error})
+                    {"success": False, "status": False, "message": "You are restricted from Adding Symptoms"})
         else:
             raise KeyError
     except ValueError:
