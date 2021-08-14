@@ -26,13 +26,15 @@ class OtherOperations:
         k = 0
         pk = ''
         for i in data.keys():
-            if re.search('_id', i) is None:
+            if re.search('_id', i) is None and re.search('_token', i) is None:
                 ust += (i + '''=%s''')
                 if k < len(data.keys()) - 2:
                     ust += ''', '''
                 else:
                     ust += ''' '''
                 k += 1
+            elif re.search('_token', i) is None:
+                pk = re.search('_token', i).string
             else:
                 pk = re.search('_id', i).string
         ust += ('''where ''' + pk + '''=%s''')

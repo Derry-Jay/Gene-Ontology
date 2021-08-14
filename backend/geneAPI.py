@@ -260,7 +260,7 @@ def updateUserData():
             request.body.read().decode('utf8'))
         if data is None or data == {}:
             raise ValueError
-        elif 'user_id' in data.keys():
+        elif 'device_token' in data.keys():
             cqs = mop.generateUpdateStatement('public.registered_users', data)
             ud2 = mop.getListFromDict(data)
             try:
