@@ -450,17 +450,21 @@ def updateDiseaseCategory():
             request.body.read().decode('utf8'))
         if data == {} or data is None:
             raise ValueError
-        elif 'disease_category' in data.keys() and 'disease_category_id' in data.keys():
-            try:
-                cur.execute(
-                    '''update public.disease_categories set disease_category = %s where disease_category_id = %s''', (data['disease_category'], data['disease_category_id']))
-                con.commit()
+        elif 'disease_category' in data.keys() and 'disease_category_id' in data.keys() and 'user_type' in data.keys():
+            if data['user_type'] in (1, 2):
+                try:
+                    cur.execute(
+                        '''update public.disease_categories set disease_category = %s where disease_category_id = %s''', (data['disease_category'], data['disease_category_id']))
+                    con.commit()
+                    response.body = str(
+                        {"success": True, "status": True, "message": "Disease Category Updated Successfully"})
+                except Exception as e:
+                    error = e.args[0].split('\n')[0]
+                    response.body = str(
+                        {"success": False, "status": False, "message": error})
+            else:
                 response.body = str(
-                    {"success": True, "status": True, "message": "Disease Category Updated Successfully"})
-            except Exception as e:
-                error = e.args[0].split('\n')[0]
-                response.body = str(
-                    {"success": False, "status": False, "message": error})
+                    {"success": False, "status": False, "message": "You are restricted from Updating Disease Category"})
         else:
             raise KeyError
     except ValueError:
@@ -579,19 +583,23 @@ def updateDisease():
             request.body.read().decode('utf8'))
         if data is None or data == {}:
             raise ValueError
-        elif 'disease_id' in data.keys() and 'disease' in data.keys() and 'disease_category_id' in data.keys() and 'disease_image_url' in data.keys():
-            try:
-                d1 = (data['disease'], data['disease_category_id'], data['disease_image_url'],
-                      data['disease_id'])
-                qs = mop.generateUpdateStatement('public.diseases', data)
-                cur.execute(qs, d1)
-                con.commit()
+        elif 'disease_id' in data.keys() and 'disease' in data.keys() and 'disease_category_id' in data.keys() and 'disease_image_url' in data.keys() and 'user_type' in data.keys():
+            if data['user_type'] in (1, 2):
+                try:
+                    d1 = (data['disease'], data['disease_category_id'], data['disease_image_url'],
+                          data['disease_id'])
+                    qs = mop.generateUpdateStatement('public.diseases', data)
+                    cur.execute(qs, d1)
+                    con.commit()
+                    response.body = str(
+                        {"success": True, "status": True, "message": "Disease Updated Successfully"})
+                except Exception as e:
+                    error = e.args[0].split('\n')[0]
+                    response.body = str(
+                        {"success": False, "status": False, "message": error})
+            else:
                 response.body = str(
-                    {"success": True, "status": True, "message": "Disease Updated Successfully"})
-            except Exception as e:
-                error = e.args[0].split('\n')[0]
-                response.body = str(
-                    {"success": False, "status": False, "message": error})
+                    {"success": False, "status": False, "message": "You are restricted from Updating Disease"})
         else:
             raise KeyError
     except ValueError:
@@ -738,18 +746,22 @@ def updateGene():
             request.body.read().decode('utf8'))
         if data == {} or data is None:
             raise ValueError
-        elif 'gene' in data.keys() and 'gene_id' in data.keys():
-            try:
-                gd = (data['gene'], data['gene_id'])
-                qs = mop.generateUpdateStatement('public.genes', data)
-                cur.execute(qs, gd)
-                con.commit()
+        elif 'gene' in data.keys() and 'gene_id' in data.keys() and 'user_type' in data.keys():
+            if data['user_type'] in (1, 2):
+                try:
+                    gd = (data['gene'], data['gene_id'])
+                    qs = mop.generateUpdateStatement('public.genes', data)
+                    cur.execute(qs, gd)
+                    con.commit()
+                    response.body = str(
+                        {"success": True, "status": True, "message": "Gene Updated Successfully"})
+                except Exception as e:
+                    error = e.args[0].split('\n')[0]
+                    response.body = str(
+                        {"success": False, "status": False, "message": error})
+            else:
                 response.body = str(
-                    {"success": True, "status": True, "message": "Gene Updated Successfully"})
-            except Exception as e:
-                error = e.args[0].split('\n')[0]
-                response.body = str(
-                    {"success": False, "status": False, "message": error})
+                    {"success": False, "status": False, "message": "You are restricted from Updating Gene"})
         else:
             raise KeyError
     except ValueError:
@@ -843,18 +855,22 @@ def updateSymptom():
             request.body.read().decode('utf8'))
         if data is None or data == {}:
             raise ValueError
-        elif 'symptom' in data.keys() and 'symptom_id' in data.keys():
-            try:
-                sd = (data['symptom'], data['symptom_id'])
-                qs = mop.generateUpdateStatement('public.symptoms', data)
-                cur.execute(qs, sd)
-                con.commit()
+        elif 'symptom' in data.keys() and 'symptom_id' in data.keys() and 'user_type' in data.keys():
+            if data['user_type'] in (1, 2):
+                try:
+                    sd = (data['symptom'], data['symptom_id'])
+                    qs = mop.generateUpdateStatement('public.symptoms', data)
+                    cur.execute(qs, sd)
+                    con.commit()
+                    response.body = str(
+                        {"success": True, "status": True, "message": "Symptom Updated Successfully"})
+                except Exception as e:
+                    error = e.args[0].split('\n')[0]
+                    response.body = str(
+                        {"success": False, "status": False, "message": error})
+            else:
                 response.body = str(
-                    {"success": True, "status": True, "message": "Symptom Updated Successfully"})
-            except Exception as e:
-                error = e.args[0].split('\n')[0]
-                response.body = str(
-                    {"success": False, "status": False, "message": error})
+                    {"success": False, "status": False, "message": "You are restricted from Adding Symptoms"})
         else:
             raise KeyError
     except ValueError:
