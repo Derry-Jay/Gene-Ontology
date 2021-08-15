@@ -137,7 +137,7 @@ def login():
             response.body = str(
                 {"success": False, "status": False, "message": "Please Provide The Necessary Parameters"})
         return ast.literal_eval(response.body)
-    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+    response.headers['Access-Control-Allow-Origin'] = ['http://localhost:8080','http://localhost:8081']
     response.headers['Content-Type'] = 'application/json'
     return ast.literal_eval(response.body)
 
@@ -191,7 +191,7 @@ def register():
     except KeyError:
         response.status = 409
         return
-    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+    response.headers['Access-Control-Allow-Origin'] = ['http://localhost:8080','http://localhost:8081']
     response.headers['Content-Type'] = 'application/json'
     return ast.literal_eval(response.body)
 
@@ -233,7 +233,7 @@ def getUserDetails():
     except KeyError:
         response.status = 409
         return
-    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+    response.headers['Access-Control-Allow-Origin'] = ['http://localhost:8080','http://localhost:8081']
     response.headers['Content-Type'] = 'application/json'
     rb = ast.literal_eval(response.body)
     result = ast.literal_eval(rb['result']) if 'result' in rb.keys() else None
@@ -272,7 +272,7 @@ def updateUserData():
         response.status = 409
         return
 
-    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+    response.headers['Access-Control-Allow-Origin'] = ['http://localhost:8080','http://localhost:8081']
     response.headers['Content-Type'] = 'application/json'
     return ast.literal_eval(response.body)
 
@@ -305,7 +305,7 @@ def deleteUser():
         response.status = 409
         return
 
-    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+    response.headers['Access-Control-Allow-Origin'] = ['http://localhost:8080','http://localhost:8081']
     response.headers['Content-Type'] = 'application/json'
     return ast.literal_eval(response.body)
 
@@ -341,7 +341,7 @@ def storeDocs():
         response.status = 409
         return
 
-    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+    response.headers['Access-Control-Allow-Origin'] = ['http://localhost:8080','http://localhost:8081']
     response.headers['Content-Type'] = 'application/json'
     return ast.literal_eval(response.body)
 
@@ -374,7 +374,7 @@ def deleteDocument():
         response.status = 409
         return
 
-    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+    response.headers['Access-Control-Allow-Origin'] = ['http://localhost:8080','http://localhost:8081']
     response.headers['Content-Type'] = 'application/json'
     return ast.literal_eval(response.body)
 
@@ -427,7 +427,7 @@ def addDiseaseCategory():
         response.status = 409
         return
 
-    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+    response.headers['Access-Control-Allow-Origin'] = ['http://localhost:8080','http://localhost:8081']
     response.headers['Content-Type'] = 'application/json'
     return ast.literal_eval(response.body)
 
@@ -464,7 +464,7 @@ def updateDiseaseCategory():
         response.status = 409
         return
 
-    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+    response.headers['Access-Control-Allow-Origin'] = ['http://localhost:8080','http://localhost:8081']
     response.headers['Content-Type'] = 'application/json'
     return ast.literal_eval(response.body)
 
@@ -497,7 +497,7 @@ def deleteDiseaseCategory():
         response.status = 409
         return
 
-    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+    response.headers['Access-Control-Allow-Origin'] = ['http://localhost:8080','http://localhost:8081']
     response.headers['Content-Type'] = 'application/json'
     return ast.literal_eval(response.body)
 
@@ -561,7 +561,7 @@ def addDisease():
                 {"success": False, "status": False, "message": "Please Provide The Necessary Parameters"})
         return ast.literal_eval(response.body)
 
-    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+    response.headers['Access-Control-Allow-Origin'] = ['http://localhost:8080','http://localhost:8081']
     response.headers['Content-Type'] = 'application/json'
     return ast.literal_eval(response.body)
 
@@ -600,7 +600,7 @@ def updateDisease():
         response.status = 409
         return
 
-    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+    response.headers['Access-Control-Allow-Origin'] = ['http://localhost:8080','http://localhost:8081']
     response.headers['Content-Type'] = 'application/json'
     return ast.literal_eval(response.body)
 
@@ -634,7 +634,7 @@ def deleteDisease():
         response.status = 409
         return
 
-    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+    response.headers['Access-Control-Allow-Origin'] = ['http://localhost:8080','http://localhost:8081']
     response.headers['Content-Type'] = 'application/json'
     return ast.literal_eval(response.body)
 
@@ -687,7 +687,7 @@ def addGene():
         response.status = 409
         return
 
-    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+    response.headers['Access-Control-Allow-Origin'] = ['http://localhost:8080','http://localhost:8081']
     response.headers['Content-Type'] = 'application/json'
     return ast.literal_eval(response.body)
 
@@ -725,7 +725,7 @@ def updateGene():
         response.status = 409
         return
 
-    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+    response.headers['Access-Control-Allow-Origin'] = ['http://localhost:8080','http://localhost:8081']
     response.headers['Content-Type'] = 'application/json'
     return ast.literal_eval(response.body)
 
@@ -758,7 +758,7 @@ def deleteGene():
         response.status = 409
         return
 
-    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+    response.headers['Access-Control-Allow-Origin'] = ['http://localhost:8080','http://localhost:8081']
     response.headers['Content-Type'] = 'application/json'
     return ast.literal_eval(response.body)
 
@@ -796,7 +796,7 @@ def addSymptom():
         response.status = 409
         return
 
-    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+    response.headers['Access-Control-Allow-Origin'] = ['http://localhost:8080','http://localhost:8081']
     response.headers['Content-Type'] = 'application/json'
     return ast.literal_eval(response.body)
 
@@ -834,7 +834,7 @@ def updateSymptom():
         response.status = 409
         return
 
-    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+    response.headers['Access-Control-Allow-Origin'] = ['http://localhost:8080','http://localhost:8081']
     response.headers['Content-Type'] = 'application/json'
     return ast.literal_eval(response.body)
 
@@ -868,7 +868,7 @@ def deleteSymptom():
         response.status = 409
         return
 
-    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+    response.headers['Access-Control-Allow-Origin'] = ['http://localhost:8080','http://localhost:8081']
     response.headers['Content-Type'] = 'application/json'
     return ast.literal_eval(response.body)
 
@@ -906,7 +906,7 @@ def addRemedy():
         response.status = 409
         return
 
-    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+    response.headers['Access-Control-Allow-Origin'] = ['http://localhost:8080','http://localhost:8081']
     response.headers['Content-Type'] = 'application/json'
     return ast.literal_eval(response.body)
 
@@ -944,7 +944,7 @@ def updateRemedy():
         response.status = 409
         return
 
-    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+    response.headers['Access-Control-Allow-Origin'] = ['http://localhost:8080','http://localhost:8081']
     response.headers['Content-Type'] = 'application/json'
     return ast.literal_eval(response.body)
 
@@ -978,7 +978,7 @@ def deleteRemedy():
         response.status = 409
         return
 
-    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+    response.headers['Access-Control-Allow-Origin'] = ['http://localhost:8080','http://localhost:8081']
     response.headers['Content-Type'] = 'application/json'
     return ast.literal_eval(response.body)
 
@@ -1040,7 +1040,7 @@ def addBloodGroup():
         response.status = 409
         return
 
-    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+    response.headers['Access-Control-Allow-Origin'] = ['http://localhost:8080','http://localhost:8081']
     response.headers['Content-Type'] = 'application/json'
     return ast.literal_eval(response.body)
 
@@ -1074,7 +1074,7 @@ def deleteBloodGroup():
         response.status = 409
         return
 
-    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+    response.headers['Access-Control-Allow-Origin'] = ['http://localhost:8080','http://localhost:8081']
     response.headers['Content-Type'] = 'application/json'
     return ast.literal_eval(response.body)
 
@@ -1110,7 +1110,7 @@ def getBloodGroups():
         response.status = 409
         return
 
-    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+    response.headers['Access-Control-Allow-Origin'] = ['http://localhost:8080','http://localhost:8081']
     response.headers['Content-Type'] = 'application/json'
     rb = ast.literal_eval(response.body)
     result = ast.literal_eval(rb['result']) if 'result' in rb.keys() else None
@@ -1151,7 +1151,7 @@ def storeResult():
         response.body = str({"success": False, "status": False, "message": ""})
         return
 
-    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+    response.headers['Access-Control-Allow-Origin'] = ['http://localhost:8080','http://localhost:8081']
     response.headers['Content-Type'] = 'application/json'
     return ast.literal_eval(response.body)
 
@@ -1186,7 +1186,7 @@ def getDocumentList():
     except KeyError:
         response.status = 409
         return
-    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+    response.headers['Access-Control-Allow-Origin'] = ['http://localhost:8080','http://localhost:8081']
     response.headers['Content-Type'] = 'application/json'
     rb = ast.literal_eval(response.body)
     result = ast.literal_eval(rb['result']) if 'result' in rb.keys() else None
@@ -1220,7 +1220,7 @@ def getPatientsList():
         error = e.args[0].split('\n')[0]
         response.body = str(
             {"success": False, "status": False, "message": error})
-    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+    response.headers['Access-Control-Allow-Origin'] = ['http://localhost:8080','http://localhost:8081']
     response.headers['Content-Type'] = 'application/json'
     rb = ast.literal_eval(response.body)
     result = ast.literal_eval(rb['result']) if 'result' in rb.keys() else None
@@ -1261,7 +1261,7 @@ def getSearchedDiseases():
     except KeyError:
         response.status = 409
         return
-    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+    response.headers['Access-Control-Allow-Origin'] = ['http://localhost:8080','http://localhost:8081']
     response.headers['Content-Type'] = 'application/json'
     rb = ast.literal_eval(response.body)
     result = ast.literal_eval(rb['result']) if 'result' in rb.keys() else None
@@ -1307,7 +1307,7 @@ def getTestResults():
     except KeyError:
         response.status = 409
         return
-    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+    response.headers['Access-Control-Allow-Origin'] = ['http://localhost:8080','http://localhost:8081']
     response.headers['Content-Type'] = 'application/json'
     rb = ast.literal_eval(response.body)
     result = ast.literal_eval(rb['result']) if 'result' in rb.keys() else None
@@ -1338,11 +1338,11 @@ def logout():
         print(e.args)
         response.body = str(
             {"success": False, "status": False, "message": error})
-    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+    response.headers['Access-Control-Allow-Origin'] = ['http://localhost:8080','http://localhost:8081']
     return ast.literal_eval(response.body)
 
 
 if __name__ == "__main__":
     app.install(CorsPlugin(
-        origins=['http://localhost:8080/#/', 'http://localhost:8080/', 'http://localhost:8080']))
+        origins=['http://localhost:8080/#/', 'http://localhost:8080/', 'http://localhost:8080''http://localhost:8081/#/', 'http://localhost:8081/', 'http://localhost:8081']))
     app.run(host='127.0.0.1', port='8000', reloader=True, debug=True)
