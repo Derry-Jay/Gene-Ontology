@@ -268,7 +268,7 @@ def updateUserData():
     except ValueError:
         response.status = 400
         return
-    except KeyError as e:
+    except KeyError:
         response.status = 409
         return
 
@@ -998,7 +998,7 @@ def addBloodGroup():
                 cur.execute(
                     '''select rhesus_protein_status_id from public.rhesus_protein_statuses where rhesus_protein_status=%s''', rpsd)
                 tmp = cur.fetchone()
-                rsid = 0 if tmp == None else tmp
+                rsid = 0 if tmp == None else tmp[0]
                 cur.execute(
                     '''select blood_group_id from public.blood_groups where blood_group=%s''', bld)
                 tmp = cur.fetchone()
@@ -1033,6 +1033,40 @@ def addBloodGroup():
                 response.body = str(
                     {"success": False, "status": False, "message": error})
 
+    except ValueError:
+        response.status = 400
+        return
+    except KeyError:
+        response.status = 409
+        return
+
+    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+    response.headers['Content-Type'] = 'application/json'
+    return ast.literal_eval(response.body)
+
+
+@app.delete('/deleteBloodGroup')
+@enable_cors
+def deleteBloodGroup():
+    try:
+        data = request.json if request.json is not None else ast.literal_eval(
+            request.body.read().decode('utf8'))
+        if data is None or data == {}:
+            raise ValueError
+        elif 'blood_group_id' in data.keys() and 'user_type' in data.keys() and data['user_type'] in (1, 2):
+            try:
+                v = (data['blood_group_id'],)
+                cur.execute(
+                    '''delete from public.blood_groups where blood_group_id=%s''', v)
+                con.commit()
+                response.body = str(
+                    {"success": True, "status": True, "message": "Blood Group Deleted Successfully"})
+            except Exception as e:
+                error = e.args[0].split('\n')[0]
+                response.body = str(
+                    {"success": False, "status": False, "message": error})
+        else:
+            raise KeyError
     except ValueError:
         response.status = 400
         return
