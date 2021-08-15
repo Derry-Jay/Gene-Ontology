@@ -28,6 +28,7 @@ db = mc['local']
 col = db['gene_test_results']
 con = pypg.connect(user='postgres', password='password', database='postgres')
 cur = con.cursor()
+
 # print("++++++++++++++++++++++++++++++++++++++++")
 # print(MetricDistance(Calculations().haversine(
 #     LatLong(12.9739697, 80.2151917), LatLong(12.9794559, 80.2222834))))
