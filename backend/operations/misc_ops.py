@@ -85,3 +85,6 @@ class OtherOperations:
 
     def logicalXOR(self, a, b):
         return False if a and b else a or b
+
+    def setNotNull(self, a, b):
+        return b if a == None else b

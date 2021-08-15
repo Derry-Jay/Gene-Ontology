@@ -10,44 +10,33 @@ from botocore.config import Config
 from bson.objectid import ObjectId
 from models.latlong import LatLong
 from models.distance import MetricDistance
+from bottle import Bottle, request, response
 from operations.calculate import Calculations
 from operations.misc_ops import OtherOperations
 from operations.corroboration import Corroboration
 from truckpad.bottle.cors import CorsPlugin, enable_cors
-from bottle import Bottle, request, response, post, get, put, delete, run
+
 app = Bottle(__name__)
 emailpattern = re.compile(r'^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$')
 passwordpattern = re.compile(
     r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!#%*?&]{6,20}$')
 mop = OtherOperations()
 calc = Calculations()
-# print("++++++++++++++++++++++++++++++++++++++++")
-# print(MetricDistance(Calculations().haversine(
-#     LatLong(12.9739697, 80.2151917), LatLong(12.9794559, 80.2222834))))
-# print("-----------------------------------------")
-# exit()
-
-
-# '''update public.diseases set disease=%s , disease_category_id= %s, disease_image_url=%s where disease_id=%s'''
-# cqs+
-# cur.execute('''insert into public.registered_users(user_name, user_mail, pincode, password) values (%s , %s )''', ())
-# @app.delete
-# @app.
-# @app.
-# @app.
-# @app.
-# ast.literal_eval(request.body.read().decode('utf8'))
-# ud1 = (data['password'],
-#        data['date_of_birth'], data['gender'], data['user_email'], data['mobile_number'], data['user_name'])
-# (, KeyError)
-# where where
-
 
 mc = pm.MongoClient("mongodb://localhost:27017")
 db = mc['local']
 col = db['gene_test_results']
 con = pypg.connect(user='postgres', password='password', database='postgres')
 cur = con.cursor()
+# print("++++++++++++++++++++++++++++++++++++++++")
+# print(MetricDistance(Calculations().haversine(
+#     LatLong(12.9739697, 80.2151917), LatLong(12.9794559, 80.2222834))))
+# print("-----------------------------------------")
+# exit()
+
+# ud1 = (data['password'],
+#        data['date_of_birth'], data['gender'], data['user_email'], data['mobile_number'], data['user_name'])
+# +data['disease'], KeyError
 
 # mys = boto3.session.Session(
 #     aws_access_key_id='AKIA4NWNR6RKLLQXECEN', aws_secret_access_key='DsspNdp62GLSoK2xDLrSPaQyqW7Wz1iK92iL2h', region_name='ap-south-1')
@@ -152,8 +141,8 @@ def login():
     return ast.literal_eval(response.body)
 
 
-@ app.post('/register')
-@ enable_cors
+@app.post('/register')
+@enable_cors
 def register():
     try:
         try:
@@ -221,7 +210,7 @@ def getUserDetails():
                     '''select U.user_name, T.user_type, U.date_of_birth, G.gender, U.mobile_number, U.user_email, U.latitude, U.longitude from public.registered_users U inner join public.genders G on U.gender_id = G.gender_id inner join public.user_types T on U.user_type_id = T.user_type_id and U.device_token=%s''', q)
                 dft = [dict(zip([col[0] for col in cur.description], row))
                        for row in cur]
-                if dft is not None and dft != []:
+                if dft != None and dft != []:
                     fd = dft[0]
                     fd['date_of_birth'] = fd['date_of_birth'].strftime(
                         "%Y-%m-%d %H:%M:%S")
@@ -399,7 +388,7 @@ def addDiseaseCategory():
             raise ValueError
         elif 'disease_category' in data.keys() and 'user_type' in data.keys():
             try:
-                dt = (data['disease_category'].lower(),)
+                dt = (data['disease_category'].upper(),)
                 cur.execute(
                     '''select count(disease_category_id) from public.disease_categories where disease_category=%s''', dt)
                 b = cur.fetchone()[0]
@@ -454,7 +443,7 @@ def updateDiseaseCategory():
             if data['user_type'] in (1, 2):
                 try:
                     cur.execute(
-                        '''update public.disease_categories set disease_category = %s where disease_category_id = %s''', (data['disease_category'], data['disease_category_id']))
+                        '''update public.disease_categories set disease_category = %s where disease_category_id = %s''', (data['disease_category'].upper(), data['disease_category_id']))
                     con.commit()
                     response.body = str(
                         {"success": True, "status": True, "message": "Disease Category Updated Successfully"})
@@ -487,7 +476,7 @@ def deleteDiseaseCategory():
             request.body.read().decode('utf8'))
         if data is None or data == {}:
             raise ValueError
-        elif 'disease_category_id' in data.keys():
+        elif 'disease_category_id' in data.keys() and 'user_type' in data.keys() and data['user_type'] in (1, 2):
             try:
                 cur.execute(
                     '''delete from public.disease_categories where disease_category_id = %s''', (data['disease_category_id'],))
@@ -522,8 +511,9 @@ def addDisease():
             raise ValueError
         elif 'disease' in data.keys() and 'disease_image_url' in data.keys() and 'user_type' in data.keys():
             try:
-                d1 = (data['disease'].lower(), data['disease_image_url'])
-                d2 = (data['disease'].lower(),)
+                duc = data['disease'].upper()
+                d1 = (duc, data['disease_image_url'])
+                d2 = (duc,)
                 cur.execute(
                     '''select count(disease_id) from public.diseases where disease=%s''', d2)
                 f = cur.fetchone()[0]
@@ -586,7 +576,7 @@ def updateDisease():
         elif 'disease_id' in data.keys() and 'disease' in data.keys() and 'disease_category_id' in data.keys() and 'disease_image_url' in data.keys() and 'user_type' in data.keys():
             if data['user_type'] in (1, 2):
                 try:
-                    d1 = (data['disease'], data['disease_category_id'], data['disease_image_url'],
+                    d1 = (data['disease'].upper(), data['disease_category_id'], data['disease_image_url'],
                           data['disease_id'])
                     qs = mop.generateUpdateStatement('public.diseases', data)
                     cur.execute(qs, d1)
@@ -622,7 +612,7 @@ def deleteDisease():
             request.body.read().decode('utf8'))
         if data is None or data == {}:
             raise ValueError
-        elif 'disease_id' in data.keys():
+        elif 'disease_id' in data.keys() and 'user_type' in data.keys() and data['user_type'] in (1, 2):
             try:
                 a = (data['disease_id'],)
                 cur.execute(
@@ -656,7 +646,7 @@ def addGene():
             request.body.read().decode('utf8'))
         if data is None or data == {}:
             raise ValueError
-        elif 'gene' in data.keys() and 'user_type' in data.keys():
+        elif 'gene' in data.keys() and data['gene'] != "" and 'user_type' in data.keys():
             try:
                 dt = (data['gene'].upper(), )
                 cur.execute(
@@ -701,43 +691,6 @@ def addGene():
     return ast.literal_eval(response.body)
 
 
-@app.post('/storeResult')
-@enable_cors
-def storeResult():
-    try:
-        data = request.json if request.json is not None else ast.literal_eval(
-            request.body.read().decode('utf8'))
-        if data is None or data == {}:
-            raise ValueError
-        elif 'patient_id' in data.keys() and 'patient_gene_id' in data.keys() and 'molecular_value' in data.keys() and 'biological_process' in data.keys() and 'cellular_component' in data.keys() and 'molecular_value_average' in data.keys() and 'biological_process_average' in data.keys() and 'cellular_component_average' in data.keys() and 'cross_ontology_value' in data.keys() and 'cross_ontology_result' in data.keys() and 'possible_disease_id' in data.keys() and 'possible_disease Name' in data.keys() and 'pharmatist_id' in data.keys() and 'symptoms' in data.keys() and 'preventive_measures' in data.keys():
-            try:
-                upd = col.insert_one(data)
-                id = str(upd.inserted_id)
-                utd = (data['patient_id'], id)
-                cur.execute(
-                    '''insert into public.user_test_results values(%s,%s)''', utd)
-                con.commit()
-                response.body = str(
-                    {"success": True, "status": True, "message": "Result Stored Successfully", "result_id": id})
-            except Exception as e:
-                error = e.args[0].split('\n')[0]
-                response.body = str(
-                    {"success": False, "status": False, "message": error})
-        else:
-            raise KeyError
-    except ValueError:
-        response.status = 400
-        return
-    except KeyError:
-        response.status = 409
-        response.body = str({"success": False, "status": False, "message": ""})
-        return
-
-    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
-    response.headers['Content-Type'] = 'application/json'
-    return ast.literal_eval(response.body)
-
-
 @app.put('/updateGene')
 @enable_cors
 def updateGene():
@@ -746,10 +699,10 @@ def updateGene():
             request.body.read().decode('utf8'))
         if data == {} or data is None:
             raise ValueError
-        elif 'gene' in data.keys() and 'gene_id' in data.keys() and 'user_type' in data.keys():
+        elif 'gene' in data.keys() and data['gene'] != "" and 'gene_id' in data.keys() and 'user_type' in data.keys():
             if data['user_type'] in (1, 2):
                 try:
-                    gd = (data['gene'], data['gene_id'])
+                    gd = (data['gene'].upper(), data['gene_id'])
                     qs = mop.generateUpdateStatement('public.genes', data)
                     cur.execute(qs, gd)
                     con.commit()
@@ -784,7 +737,7 @@ def deleteGene():
             request.body.read().decode('utf8'))
         if data is None or data == {}:
             raise ValueError
-        elif 'gene_id' in data.keys():
+        elif 'gene_id' in data.keys() and 'user_type' in data.keys() and data['user_type'] in (1, 2):
             try:
                 p = (data['gene_id'],)
                 cur.execute('''delete from public.genes where gene_id=%s''', p)
@@ -817,10 +770,10 @@ def addSymptom():
             request.body.read().decode('utf8'))
         if data == {} or data is None:
             raise ValueError
-        elif 'symptom' in data.keys() and 'user_type' in data.keys():
+        elif 'symptom' in data.keys() and data['symptom'] != "" and 'user_type' in data.keys():
             if data['user_type'] in (1, 2):
                 try:
-                    a = (data['symptom'],)
+                    a = (data['symptom'].upper(),)
                     cur.execute(
                         '''insert into public.symptoms(symptom) values(%s)''', a)
                     con.commit()
@@ -855,10 +808,10 @@ def updateSymptom():
             request.body.read().decode('utf8'))
         if data is None or data == {}:
             raise ValueError
-        elif 'symptom' in data.keys() and 'symptom_id' in data.keys() and 'user_type' in data.keys():
+        elif 'symptom' in data.keys() and data['symptom'] != "" and 'symptom_id' in data.keys() and 'user_type' in data.keys():
             if data['user_type'] in (1, 2):
                 try:
-                    sd = (data['symptom'], data['symptom_id'])
+                    sd = (data['symptom'].upper(), data['symptom_id'])
                     qs = mop.generateUpdateStatement('public.symptoms', data)
                     cur.execute(qs, sd)
                     con.commit()
@@ -893,7 +846,7 @@ def deleteSymptom():
             request.body.read().decode('utf8'))
         if data is None or data == {}:
             raise ValueError
-        elif 'symptom_id' in data.keys():
+        elif 'symptom_id' in data.keys() and 'user_type' in data.keys() and data['user_type'] in (1, 2):
             try:
                 v = (data['symptom_id'],)
                 cur.execute(
@@ -912,6 +865,255 @@ def deleteSymptom():
         return
     except KeyError:
         response.status = 409
+        return
+
+    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+    response.headers['Content-Type'] = 'application/json'
+    return ast.literal_eval(response.body)
+
+
+@app.post('/addRemedy')
+@enable_cors
+def addRemedy():
+    try:
+        data = request.json if request.json is not None else ast.literal_eval(
+            request.body.read().decode('utf8'))
+        if data == {} or data is None:
+            raise ValueError
+        elif 'remedy' in data.keys() and data['remedy'] != "" and 'user_type' in data.keys():
+            if data['user_type'] in (1, 2):
+                try:
+                    a = (data['remedy'].upper(),)
+                    cur.execute(
+                        '''insert into public.remedies(remedy) values(%s)''', a)
+                    con.commit()
+                    response.body = str(
+                        {"success": True, "status": True, "message": "Remedy Added Successfully"})
+                except Exception as e:
+                    error = e.args[0].split('\n')[0]
+                    response.body = str(
+                        {"success": False, "status": False, "message": error})
+            else:
+                response.body = str(
+                    {"success": False, "status": False, "message": "You are restricted from Adding Remedies"})
+        else:
+            raise KeyError
+    except ValueError:
+        response.status = 400
+        return
+    except KeyError:
+        response.status = 409
+        return
+
+    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+    response.headers['Content-Type'] = 'application/json'
+    return ast.literal_eval(response.body)
+
+
+@app.put('/updateRemedy')
+@enable_cors
+def updateRemedy():
+    try:
+        data = request.json if request.json is not None else ast.literal_eval(
+            request.body.read().decode('utf8'))
+        if data is None or data == {}:
+            raise ValueError
+        elif 'remedy' in data.keys() and data['remedy'] != "" and 'remedy_id' in data.keys() and 'user_type' in data.keys():
+            if data['user_type'] in (1, 2):
+                try:
+                    sd = (data['remedy'].upper(), data['remedy_id'])
+                    qs = '''update public.remedies set remedy=%s where remedy_id=%s'''
+                    cur.execute(qs, sd)
+                    con.commit()
+                    response.body = str(
+                        {"success": True, "status": True, "message": "Remedy Updated Successfully"})
+                except Exception as e:
+                    error = e.args[0].split('\n')[0]
+                    response.body = str(
+                        {"success": False, "status": False, "message": error})
+            else:
+                response.body = str(
+                    {"success": False, "status": False, "message": "You are restricted from Adding Remedies"})
+        else:
+            raise KeyError
+    except ValueError:
+        response.status = 400
+        return
+    except KeyError:
+        response.status = 409
+        return
+
+    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+    response.headers['Content-Type'] = 'application/json'
+    return ast.literal_eval(response.body)
+
+
+@app.delete('/deleteRemedy')
+@enable_cors
+def deleteRemedy():
+    try:
+        data = request.json if request.json is not None else ast.literal_eval(
+            request.body.read().decode('utf8'))
+        if data is None or data == {}:
+            raise ValueError
+        elif 'remedy_id' in data.keys() and 'user_type' in data.keys() and data['user_type'] in (1, 2):
+            try:
+                v = (data['remedy_id'],)
+                cur.execute(
+                    '''delete from public.remedies where remedy_id=%s''', v)
+                con.commit()
+                response.body = str(
+                    {"success": True, "status": True, "message": "Remedy Deleted Successfully"})
+            except Exception as e:
+                error = e.args[0].split('\n')[0]
+                response.body = str(
+                    {"success": False, "status": False, "message": error})
+        else:
+            raise KeyError
+    except ValueError:
+        response.status = 400
+        return
+    except KeyError:
+        response.status = 409
+        return
+
+    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+    response.headers['Content-Type'] = 'application/json'
+    return ast.literal_eval(response.body)
+
+
+@app.post('/addBloodGroup')
+@enable_cors
+def addBloodGroup():
+    try:
+        data = ast.literal_eval(request.body.read().decode(
+            'utf8')) if request.json is None else request.json
+        if data is None or data == {}:
+            raise ValueError
+        elif 'blood_group' in data.keys() and data['blood_group'] != "" and 'user_type' in data.keys() and data['user_type'] in (1, 2) and 'rhesus_protein_status' in data.keys() and data['rhesus_protein_status'] != "":
+            try:
+                bld = (data['blood_group'].upper(),)
+                rpsd = (data['rhesus_protein_status'].upper(),)
+                cur.execute(
+                    '''select rhesus_protein_status_id from public.rhesus_protein_statuses where rhesus_protein_status=%s''', rpsd)
+                tmp = cur.fetchone()
+                rsid = 0 if tmp == None else tmp
+                cur.execute(
+                    '''select blood_group_id from public.blood_groups where blood_group=%s''', bld)
+                tmp = cur.fetchone()
+                blgid = 0 if tmp == None else tmp[0]
+                blgrhd = (blgid, rsid)
+                cur.execute(
+                    '''select count(*) from public.blood_rhesus where blood_group_id=%s and rhesus_protein_status_id=%s''', blgrhd)
+                val = cur.fetchone()[0]
+                if val == 0:
+                    try:
+                        cur.execute(
+                            '''insert into public.blood_groups(blood_group) values(%s)''', bld)
+                        con.commit()
+                        cur.execute(
+                            '''select blood_group_id from public.blood_groups where blood_group=%s''', bld)
+                        bgid = cur.fetchone()[0]
+                        bgrsd = (bgid, rsid)
+                        cur.execute(
+                            '''insert into blood_rhesus values(%s, %s)''', bgrsd)
+                        con.commit()
+                        response.body = str(
+                            {"success": True, "status": True, "message": "Blood Group Added Successfully"})
+                    except Exception as e:
+                        error = e.args[0].split('\n')[0]
+                        response.body = str(
+                            {"success": False, "status": False, "message": error})
+                else:
+                    response.body = str(
+                        {"success": True, "status": True, "message": "Blood Group is Already Added"})
+            except Exception as e:
+                error = e.args[0].split('\n')[0]
+                response.body = str(
+                    {"success": False, "status": False, "message": error})
+
+    except ValueError:
+        response.status = 400
+        return
+    except KeyError:
+        response.status = 409
+        return
+
+    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+    response.headers['Content-Type'] = 'application/json'
+    return ast.literal_eval(response.body)
+
+
+@app.post('/getBloodGroups')
+@enable_cors
+def getBloodGroups():
+    try:
+        data = request.json if request.json is not None else ast.literal_eval(
+            request.body.read().decode('utf8'))
+        if data is None or data == {}:
+            raise ValueError
+        elif 'device_token' in data.keys() and data['device_token'] != "":
+            try:
+                cur.execute(
+                    '''select count(user_id) from public.registered_users where device_token=%s''', (data['device_token'],))
+                nt = cur.fetchone()[0]
+                if nt == 1:
+                    cur.execute(
+                        '''select B.blood_group, S.rhesus_protein_status from public.blood_groups B, public.blood_rhesus K, public.rhesus_protein_statuses S where B.blood_group_id=K.blood_group_id and K.rhesus_protein_status_id=S.rhesus_protein_status_id''')
+                    dft = [dict(zip([col[0] for col in cur.description], row))
+                           for row in cur]
+                    response.body = str(
+                        {"success": True, "status": True, "message": "Blood Group List Obtained Successfully", "result": str(dft)})
+            except Exception as e:
+                error = e.args[0].split('\n')[0]
+                response.body = str(
+                    {"success": False, "status": False, "message": error})
+    except ValueError:
+        response.status = 400
+        return
+    except KeyError:
+        response.status = 409
+        return
+
+    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+    response.headers['Content-Type'] = 'application/json'
+    rb = ast.literal_eval(response.body)
+    result = ast.literal_eval(rb['result']) if 'result' in rb.keys() else None
+    if result is not None:
+        rb['result'] = result
+    return rb
+
+
+@app.post('/storeResult')
+@enable_cors
+def storeResult():
+    try:
+        data = request.json if request.json is not None else ast.literal_eval(
+            request.body.read().decode('utf8'))
+        if data is None or data == {}:
+            raise ValueError
+        elif 'patient_id' in data.keys() and 'patient_gene_id' in data.keys() and 'molecular_value' in data.keys() and 'biological_process' in data.keys() and 'cellular_component' in data.keys() and 'molecular_value_average' in data.keys() and 'biological_process_average' in data.keys() and 'cellular_component_average' in data.keys() and 'cross_ontology_value' in data.keys() and 'cross_ontology_result' in data.keys() and 'possible_disease_id' in data.keys() and 'possible_disease Name' in data.keys() and 'pharmatist_id' in data.keys() and 'symptoms' in data.keys() and 'preventive_measures' in data.keys():
+            try:
+                upd = col.insert_one(data)
+                id = str(upd.inserted_id)
+                utd = (data['patient_id'], id)
+                cur.execute(
+                    '''insert into public.user_test_results values(%s,%s)''', utd)
+                con.commit()
+                response.body = str(
+                    {"success": True, "status": True, "message": "Result Stored Successfully", "result_id": id})
+            except Exception as e:
+                error = e.args[0].split('\n')[0]
+                response.body = str(
+                    {"success": False, "status": False, "message": error})
+        else:
+            raise KeyError
+    except ValueError:
+        response.status = 400
+        return
+    except KeyError:
+        response.status = 409
+        response.body = str({"success": False, "status": False, "message": ""})
         return
 
     response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
@@ -962,15 +1164,23 @@ def getDocumentList():
 @enable_cors
 def getPatientsList():
     try:
-        cur.execute('''select U.user_name, U.date_of_birth, G.gender, U.mobile_number, U.user_email, U.pincode from public.registered_users U inner join genders G on U.gender_id = G.gender_id and user_type_id=%s''', ("0",))
-        d = [dict(zip([col[0] for col in cur.description], row))
-             for row in cur]
-        for i in d:
-            i['date_of_birth'] = i['date_of_birth'].strftime(
-                "%Y-%m-%d %H:%M:%S")
-        b = {"success": True, "status": True,
-             "message": "Patient List", "result": str(d)}
-        response.body = str(b)
+        data = request.json if request.json is not None else ast.literal_eval(
+            request.body.read().decode('utf8'))
+        if data is None or data == {}:
+            raise ValueError
+        elif 'user_type' in data.keys() and data['user_type'] in (1, 2):
+            cur.execute('''select U.user_name, U.date_of_birth, G.gender, U.mobile_number, U.user_email, U.latitude, U.longitude from public.registered_users U inner join genders G on U.gender_id = G.gender_id and user_type_id=%s''', ("0",))
+            d = [dict(zip([col[0] for col in cur.description], row))
+                 for row in cur]
+            for i in d:
+                i['date_of_birth'] = i['date_of_birth'].strftime(
+                    "%Y-%m-%d %H:%M:%S")
+            b = {"success": True, "status": True,
+                 "message": "Patient List", "result": str(d)}
+            response.body = str(b)
+        else:
+            response.body = str(
+                {"success": False, "status": False, "message": "You are unauthorized to view other patients"})
     except Exception as e:
         error = e.args[0].split('\n')[0]
         response.body = str(
