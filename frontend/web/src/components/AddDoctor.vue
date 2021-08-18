@@ -93,32 +93,31 @@
   </div>
 </template>
 <script type="text/javascript">
-$(document).ready(function () {
-  $('#owl-partners').owlCarousel({
-    autoPlay: 4000,
-    stopOnHover: true,
-    pagination: false,
-    items: 5,
-    itemsDesktop: [1199, 4],
-    itemsDesktopSmall: [959, 3]
-  })
-})
-$(function () {
-  $('#cbp-qtrotator').cbpQTRotator()
-})
-var _gaq = _gaq || []
-_gaq.push(['_setAccount', 'UA-15815880-3'])
-_gaq.push(['_trackPageview']);
-(function () {
-  var ga = document.createElement('script')
-  ga.type = 'text/javascript'
-  ga.async = true
-  ga.src =
-    (document.location.protocol == 'https:' ? 'https://ssl' : 'http://www') +
-    '.google-analytics.com/ga.js'
-  var s = document.getElementsByTagName('script')[0]
-  s.parentNode.insertBefore(ga, s)
-})()
+// (document).ready(function () {
+//   ('#owl-partners').owlCarousel({
+//     autoPlay: 4000,
+//     stopOnHover: true,
+//     pagination: false,
+//     items: 5,
+//     itemsDesktop: [1199, 4],
+//     itemsDesktopSmall: [959, 3]
+//   })
+// })(function () {
+//   ('#cbp-qtrotator').cbpQTRotator()
+// })
+// var gaq = _gaq || []
+// gaq.push(['_setAccount', 'UA-15815880-3'])
+// gaq.push(['_trackPageview']);
+// (function () {
+//   var ga = document.createElement('script')
+//   ga.type = 'text/javascript'
+//   ga.async = true
+//   ga.src =
+//     (document.location.protocol === 'https:' ? 'https://ssl' : 'http://www') +
+//     '.google-analytics.com/ga.js'
+//   var s = document.getElementsByTagName('script')[0]
+//   s.parentNode.insertBefore(ga, s)
+// })()
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
