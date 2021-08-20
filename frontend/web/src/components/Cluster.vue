@@ -34,8 +34,8 @@
   </script>
 </center>
 </head>
-<body>
+<template>
   <style>div.google-visualization-tooltip { transform: rotate(30deg); }</style>
   <div id="tooltip_rotated" style="width: 1000px; height: 600px;"></div>
-</body>
+</template>
 </html>

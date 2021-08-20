@@ -49,7 +49,7 @@
 <script src="js/functions.js"></script>
 <script src="js/you-video.js"></script>
 </head>
-<body>
+<template>
   <div class="animsition-overlay">
     <div class="horBar2Bxx wow fadeInLeftBig" data-wow-duration="3s"></div>
     <header class="main_h">
@@ -112,5 +112,5 @@
        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
      })();
    </script>
-  </body>
+  </template>
 </html>

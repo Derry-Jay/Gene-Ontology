@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-const routerOptions = [
+export const routerOptions = [
+  { path: '/', component: 'HelloWorld' },
   { path: '/welcome', component: 'Welcome' },
   { path: '/login', component: 'Login' },
   { path: '/register', component: 'Register' },
