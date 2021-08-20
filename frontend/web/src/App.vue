@@ -1,13 +1,18 @@
 <template>
   <div id="app">
     <img src="./assets/logo.png">
-    <router-view/>
+    <router-link v-bind:to="'/login'">Link</router-link>
+    <button></button>
   </div>
 </template>
 
 <script>
+import { Button } from '../src/elements/Button.vue'
 export default {
-  name: 'App'
+  name: 'App',
+  components: {
+    Button
+  }
 }
 </script>
 

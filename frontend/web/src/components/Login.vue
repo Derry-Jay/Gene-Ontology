@@ -11,9 +11,9 @@
 import { UserController } from '../controllers/user_controller'
 import { ButtonPlugin } from '@syncfusion/ej2-vue-buttons'
 import Vue from 'vue'
-
-console.log('hi')
 Vue.use(ButtonPlugin)
+
+console.log('Hi')
 export default {
   data () {
     return {
@@ -27,12 +27,12 @@ export default {
   // derryjey79@gmail.com Goodbye@12
   computed: {
     login: function () {
-      console.log('Hi')
       UserController.login(this.body)
       return 'Hi'
     }
   }
 }
+console.log('Enjoy')
 </script>
 <style scoped>
 #login {

@@ -6,7 +6,7 @@
         <div class="menufix">
           <router-link v-bind:to="'/welcome'" class="logo">
             <img
-              src="{{ url_for('static',filename='images/logo.jpg') }}"
+              v-bind:src="'assets/images/logo.jpg'"
               alt="Hello"
             />
           </router-link>
