@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@syncfusion/ej2-vue-buttons": "^19.2.55",
+    "firebase": "^8.10.0",
     "vue": "^2.6.14",
     "vue-router": "^3.5.2",
     "vue-upload-component": "^2.8.22",

@@ -2,7 +2,7 @@
   <div id="app">
     <img src="./assets/logo.png">
     <router-link v-bind:to="'/login'">Link</router-link>
-    <button></button>
+    <button>Sign In</button>
   </div>
 </template>
 
