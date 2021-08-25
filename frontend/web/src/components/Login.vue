@@ -1,11 +1,11 @@
 <template>
-  <form @submit="login" id="login">
+  <v-form @submit="login" id="login">
     <label for="user_email"><span>*</span>Email</label>
     <input v-model="body.user_email" class="box1 border1" type="email" /><br />
     <label for="password"><span>*</span>Password</label>
     <input v-model="body.password" type="password" class="box1 border2" /><br />
     <ejs-button cssClass="e-flat" v-on:click="login">Login</ejs-button>
-  </form>
+  </v-form>
 </template>
 <script type="text/javascript">
 import { UserController } from '../controllers/user_controller'

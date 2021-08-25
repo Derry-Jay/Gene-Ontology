@@ -2,17 +2,22 @@
   <div id="app">
     <img src="./assets/logo.png">
     <router-link v-bind:to="'/login'">Link</router-link>
-    <button>Sign In</button>
+    <Button></Button>
   </div>
 </template>
 
 <script>
-import { Button } from '../src/elements/Button.vue'
-export default {
-  name: 'App',
+import Vue from 'vue'
+import { httpVueLoader } from 'httpVueLoader'
+// httpVueLoader.register(Vue, '../elements/Button.vue')
+
+Vue({
   components: {
-    Button
+    'Button': httpVueLoader('../elements/Button.vue')
   }
+})
+export default {
+  name: 'App'
 }
 </script>
 
